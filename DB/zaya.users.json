@@ -1,0 +1,36 @@
+[{
+  "_id": {
+    "$oid": "635a57ece393ed7df65b1b20"
+  },
+  "status": true,
+  "position": "Teacher",
+  "role": "admin",
+  "lastname": "Bayandelger",
+  "username": "Tuvshinbat",
+  "email": "tuvshinbat596@gmail.com",
+  "phone": 88011197,
+  "image": null,
+  "gender": "male",
+  "age": 0,
+  "password": "$2b$10$BwsTsBF7Cclnzd18sK5RkekE2ZJy80yTnjQ0MU3MvWmlS7qBJgmJy",
+  "createUser": {
+    "$oid": "635a57ece393ed7df65b1b20"
+  },
+  "entryData": {
+    "$date": "2022-10-27T10:05:32.106Z"
+  },
+  "createAt": {
+    "$date": "2022-12-07T16:19:58.704Z"
+  },
+  "updateAt": {
+    "$date": "2023-05-24T15:13:27.136Z"
+  },
+  "__v": 0,
+  "firstname": "Tuvshinbat",
+  "entryDate": {
+    "$date": "2022-12-07T16:19:58.702Z"
+  },
+  "updateUser": {
+    "$oid": "635a57ece393ed7df65b1b20"
+  }
+}]
