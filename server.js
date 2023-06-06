@@ -33,6 +33,9 @@ const menuRouters = require("./routes/Menu");
 const footerRouters = require("./routes/FooterMenu");
 const pageRouters = require("./routes/Pages");
 const fileRouters = require("./routes/File");
+const bookingRouters = require("./routes/Booking");
+const employeeRouters = require('./routes/Employee')
+const productRouters = require('./routes/Product');
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
 
@@ -121,16 +124,19 @@ app.use("/api/v1/news-categories", newsCategoriesRouters);
 app.use("/api/v1/imgupload", uploadRouters);
 app.use("/api/v1/services", serviceRouters);
 app.use("/api/v1/adsies", adsRouters);
+app.use('/api/v1/employees', employeeRouters);
 app.use("/api/v1/partners", partnerRouters);
 app.use("/api/v1/faqs", faqRouters);
 app.use("/api/v1/gallerys", galleryRouters);
 app.use("/api/v1/slinks", socialLinkRouters);
+app.use("/api/v1/bookings", bookingRouters);
 app.use("/api/v1/banners", bannerRouters);
 app.use("/api/v1/adsbanners", adsBannerRouters);
 app.use("/api/v1/menus", menuRouters);
 app.use("/api/v1/footermenus", footerRouters);
 app.use("/api/v1/pages", pageRouters);
 app.use("/api/v1/file", fileRouters);
+app.use('/api/v1/products', productRouters)
 app.use(errorHandler);
 // Алдаа үүсэхэд барьж авч алдааны мэдээллийг клиент тал руу автоматаар мэдээлнэ
 

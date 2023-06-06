@@ -22,14 +22,14 @@ const UserSchema = new mongoose.Schema({
     default: "operator",
   },
 
-  lastname: {
+  lastName: {
     type: String,
-    default: null,
+    default: "",
   },
 
-  firstname: {
+  firstName: {
     type: String,
-    default: null,
+    default: "",
   },
 
   courses: [
@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema({
     ],
   },
 
-  phone: {
+  phoneNumber: {
     type: Number,
     unique: true,
     required: [true, "Утасны дугаараа оруулна уу"],

@@ -2,10 +2,32 @@ const mongoose = require("mongoose");
 const { transliterate, slugify } = require("transliteration");
 
 const BookingSchema = new mongoose.Schema({
+  status: {
+    type: Boolean,
+    enum: [true, false],
+    default: false,
+  },
+
+  bookingNumber: {
+    type: Number,
+    trim: true,
+  },
+
   paid: {
     type: Boolean,
     enum: [true, false],
     default: false,
+  },
+
+  paidType: {
+    type: String,
+    enum: ["qpay", "bankaccount"],
+  },
+
+  paidAdvance: {
+    type: Number,
+    trim: true,
+    default: 0,
   },
 
   service: {
@@ -16,6 +38,7 @@ const BookingSchema = new mongoose.Schema({
 
   date: {
     type: Date,
+    required: [true, "Өдрөө сонгоно уу"],
   },
 
   time: {
@@ -23,46 +46,41 @@ const BookingSchema = new mongoose.Schema({
     required: [true, "Цагаа сонгоно уу"],
   },
 
-  name: {
+  bookingMsg: {
     type: String,
-    required: [true, "Сургалтын нэрийг оруулна уу"],
+    trim: true,
+  },
+
+  firstName: {
+    type: String,
+    required: [true, "Нэрээ оруулна уу"],
     trim: true,
     minlength: [2, "гарчиг хамгийн багадаа 2 дээш тэмдэгтээс бүтнэ."],
     maxlength: [250, "250 -аас дээш тэмдэгт оруулах боломжгүй"],
   },
 
-  details: {
+  lastName: {
     type: String,
+    required: [true, "Овогоо оруулна уу"],
     trim: true,
+    minlength: [2, "гарчиг хамгийн багадаа 2 дээш тэмдэгтээс бүтнэ."],
+    maxlength: [250, "250 -аас дээш тэмдэгт оруулах боломжгүй"],
   },
 
-  slug: {
-    type: String,
-    trim: true,
-  },
-
-  pictures: {
-    type: [String],
-  },
-
-  video: {
-    type: String,
-    trim: true,
-    required: [true, "Хичээлээ оруулна уу"],
-  },
-
-  views: {
+  phoneNumber: {
     type: Number,
-    default: 0,
+    required: [true, "Утасны дугаараа оруулна уу"],
+    trim: true,
   },
 
-  parentId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "InitCourse",
-  },
-
-  position: {
-    type: Number,
+  email: {
+    type: String,
+    required: [true, "Имэйл хаягаа оруулна уу"],
+    trim: true,
+    match: [
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+      "Имэйл хаягаа буруу оруулсан байна",
+    ],
   },
 
   createAt: {
