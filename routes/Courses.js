@@ -16,7 +16,7 @@ router
   .post(protect, authorize("admin"), createCourse)
   .get(getCourses);
 
-router.route("/excel").post(protect, authorize("admin"), excelData);
+router.route("/excel").get(protect, authorize("admin"), excelData);
 router.route("/delete").delete(protect, authorize("admin"), multDeleteCourse);
 
 router

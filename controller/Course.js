@@ -10,6 +10,7 @@ const { RegexOptions, useInitCourse } = require("../lib/searchOfterModel");
 exports.createCourse = asyncHandler(async (req, res) => {
   req.body.createUser = req.userId;
   req.body.status = req.body.status || true;
+  const parentId = req.body.parentId;
 
   const uniqueName = await Course.find({}).where("name").equals(req.body.name);
   if (uniqueName.length > 0) {
@@ -17,6 +18,18 @@ exports.createCourse = asyncHandler(async (req, res) => {
   } else {
     req.body.slug = slugify(req.body.name);
   }
+
+  let position = 0;
+  if (parentId) {
+    const course = await Course.findOne({ parentId }).sort({
+      position: -1,
+    });
+    if (course) {
+      position = course.position + 1;
+    }
+  }
+
+  req.body.position = position;
 
   const course = await Course.create(req.body);
 
@@ -229,8 +242,8 @@ const getFullData = async (req, page) => {
 };
 
 exports.excelData = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 25;
+  const page = 1;
+  const limit = 25;
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
 
@@ -346,9 +359,10 @@ exports.multDeleteCourse = asyncHandler(async (req, res) => {
     if (el.pictures && typeof el.pictures == "String") {
       await imageDelete(el.pictures);
     } else if (el.pictures && el.pictures.length > 0) {
-      await multDelete(pictures);
+      el.pictures.map(async (picture) => {
+        await imageDelete(picture);
+      });
     }
-
     if (el.video) {
       await imageDelete(el.video);
     }
@@ -405,6 +419,14 @@ exports.getSlugCourse = asyncHandler(async (req, res) => {
 
 exports.updateCourse = asyncHandler(async (req, res) => {
   let course = await Course.findById(req.params.id);
+
+  if (!valueRequired(req.body.pictures)) {
+    req.body.pictures = [];
+  }
+
+  if (!valueRequired(req.body.video)) {
+    req.body.video = "";
+  }
 
   if (!course) {
     throw new MyError("Өгөгдөл олдсонгүй", 404);

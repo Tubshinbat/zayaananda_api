@@ -1,12 +1,28 @@
 const mongoose = require("mongoose");
 const { transliterate, slugify } = require("transliteration");
 
-const CourseSchema = new mongoose.Schema({
-  status: {
+const BookingSchema = new mongoose.Schema({
+  paid: {
     type: Boolean,
     enum: [true, false],
-    default: true,
+    default: false,
   },
+
+  service: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Service",
+    required: [true, "Үйлчилгээнээс сонгоно уу"],
+  },
+
+  date: {
+    type: Date,
+  },
+
+  time: {
+    type: String,
+    required: [true, "Цагаа сонгоно уу"],
+  },
+
   name: {
     type: String,
     required: [true, "Сургалтын нэрийг оруулна уу"],
@@ -70,4 +86,4 @@ const CourseSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Course", CourseSchema);
+module.exports = mongoose.model("Booking", BookingSchema);

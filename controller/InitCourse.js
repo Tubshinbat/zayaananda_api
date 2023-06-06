@@ -379,7 +379,9 @@ exports.multDeleteInitCourse = asyncHandler(async (req, res) => {
     if (el.pictures && typeof el.pictures == "String") {
       await imageDelete(el.pictures);
     } else if (el.pictures && el.pictures.length > 0) {
-      await multDelete(pictures);
+      el.pictures.map(async (picture) => {
+        await imageDelete(picture);
+      });
     }
   });
 
