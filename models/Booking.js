@@ -83,6 +83,11 @@ const BookingSchema = new mongoose.Schema({
     ],
   },
 
+  userId: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+  },
+
   createAt: {
     type: Date,
     default: Date.now,
