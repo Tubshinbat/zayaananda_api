@@ -9,6 +9,8 @@ const { valueRequired } = require("../lib/check");
 const { RegexOptions, useServiceSearch } = require("../lib/searchOfterModel");
 
 exports.createBooking = asyncHandler(async (req, res, next) => {
+  req.body.paidAdvance = parseInt(req.body.paidAdvance) || 0;
+
   if (valueRequired(req.body.time) && valueRequired(req.body.date)) {
     const sameDate = await Booking.find({})
       .where("status")
@@ -23,7 +25,7 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
     if (req.body.date < currentDate) {
       throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.");
     }
-    console.log(sameDate);
+
     if (sameDate.length > 0)
       throw new MyError("Тухайн цаг дээр захиалга үүссэн байна.");
   } else if (!valueRequired(req.body.time) || !valueRequired(req.body.date)) {
@@ -41,9 +43,13 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
 
   req.body.paid = (valueRequired(req.body.paid) && req.body.paid) || false;
 
-  const lastOrderNumber = User.findOne({}).sort({ bookingNumber: -1 });
+  const lastOrderNumber = await Booking.findOne({}).sort({ bookingNumber: -1 });
 
-  req.body.lastOrderNumber = lastOrderNumber.bookingNumber + 1;
+  if (lastOrderNumber) {
+    req.body.bookingNumber = parseInt(lastOrderNumber.bookingNumber) + 1;
+  } else {
+    req.body.bookingNumber = 1;
+  }
 
   const booking = await Booking.create(req.body);
 
@@ -316,8 +322,8 @@ const getFullData = async (req, page) => {
 
   query.populate({ path: "service", select: "name -_id" });
   query.select(select);
-  query.populate({ path: "createUser", select: "firstname -_id" });
-  query.populate({ path: "updateUser", select: "firstname -_id" });
+  query.populate({ path: "createUser", select: "firstName -_id" });
+  query.populate({ path: "updateUser", select: "firstName -_id" });
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
@@ -482,7 +488,7 @@ exports.multDeleteBooking = asyncHandler(async (req, res, next) => {
     throw new MyError("Таны сонгосон мэдээнүүд олдсонгүй", 400);
   }
 
-  await findBookings.deleteMany({ _id: { $in: ids } });
+  await Booking.deleteMany({ _id: { $in: ids } });
 
   res.status(200).json({
     success: true,
@@ -512,10 +518,39 @@ exports.updateBooking = asyncHandler(async (req, res, next) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
+  const currentDate = new Date().toJSON().slice(0, 10);
+
+  if (req.body.date < currentDate) {
+    throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.");
+  }
+
+  const sameDate = await Booking.find({})
+    .where("status")
+    .equals(true)
+    .where("date")
+    .equals(req.body.date)
+    .where("time")
+    .equals(req.body.time);
+
+  if (sameDate.length > 0) {
+    let isSame = true;
+    if (sameDate.length === 1) {
+      if (
+        sameDate[0].firstName === req.body.firstName ||
+        sameDate[0].phoneNumber === req.body.phoneNumber
+      ) {
+        isSame = false;
+      }
+    }
+    if (isSame === true) {
+      throw new MyError("Тухайн цаг дээр захиалга үүссэн байна.");
+    }
+  }
+
   req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
-  booking = await News.findByIdAndUpdate(req.params.id, req.body, {
+  booking = await Booking.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });

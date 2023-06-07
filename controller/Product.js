@@ -9,6 +9,10 @@ const { valueRequired } = require("../lib/check");
 exports.createProduct = asyncHandler(async (req, res) => {
   req.body.createUser = req.userId;
   req.body.status = (valueRequired(req.body.status) && req.body.status) || true;
+  req.body.discount = valueRequired(req.body.discount) === true && parseInt(req.body.discount) || 0;
+
+
+
   const product = await Product.create(req.body);
   res.status(200).json({
     success: true,
@@ -140,8 +144,8 @@ const getFullData = async (req, page) => {
     }
   }
   query.select(select);
-  query.populate({ path: "createUser", select: "firstname -_id" });
-  query.populate({ path: "updateUser", select: "firstname -_id" });
+  query.populate({ path: "createUser", select: "firstName -_id" });
+  query.populate({ path: "updateUser", select: "firstName -_id" });
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
@@ -207,8 +211,8 @@ exports.excelData = asyncHandler(async (req, res) => {
     }
   }
   query.select(select);
-  query.populate({ path: "createUser", select: "firstname -_id" });
-  query.populate({ path: "updateUser", select: "firstname -_id" });
+  query.populate({ path: "createUser", select: "firstName -_id" });
+  query.populate({ path: "updateUser", select: "firstName -_id" });
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();

@@ -100,8 +100,8 @@ exports.getFullData = asyncHandler(async (req, res) => {
   let status = req.query.status || null;
   const position = req.query.position;
   const role = req.query.role;
-  const lastname = req.query.lastname;
-  const firstname = req.query.firstname;
+  const lastName = req.query.lastName;
+  const firstName = req.query.firstName;
   const username = req.query.username;
   const email = req.query.email;
   const phone = parseInt(req.query.phone) || null;
@@ -130,8 +130,8 @@ exports.getFullData = asyncHandler(async (req, res) => {
     query.find({ email: { $regex: ".*" + email + ".*", $options: "i" } });
   }
 
-  if (valueRequired(lastname)) {
-    query.find({ lastname: { $regex: ".*" + lastname + ".*", $options: "i" } });
+  if (valueRequired(lastName)) {
+    query.find({ lastName: { $regex: ".*" + lastName + ".*", $options: "i" } });
   }
 
   if (valueRequired(createUser)) {
@@ -148,9 +148,9 @@ exports.getFullData = asyncHandler(async (req, res) => {
     }
   }
 
-  if (valueRequired(firstname)) {
+  if (valueRequired(firstName)) {
     query.find({
-      firstname: { $regex: ".*" + firstname + ".*", $options: "i" },
+      firstName: { $regex: ".*" + firstName + ".*", $options: "i" },
     });
   }
 
@@ -482,7 +482,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
 
 const useSearch = async (userFirstname) => {
   const userData = await User.find({
-    firstname: { $regex: ".*" + userFirstname + ".*", $options: "i" },
+    firstName: { $regex: ".*" + userFirstname + ".*", $options: "i" },
   }).select("_id");
   return userData;
 };
@@ -491,8 +491,8 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
   let status = req.query.status || null;
   const position = req.query.position;
   const role = req.query.role;
-  const lastname = req.query.lastname;
-  const firstname = req.query.firstname;
+  const lastName = req.query.lastName;
+  const firstName = req.query.firstName;
   const username = req.query.username;
   const email = req.query.email;
   const phone = parseInt(req.query.phone) || null;
@@ -521,8 +521,8 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
     query.find({ email: { $regex: ".*" + email + ".*", $options: "i" } });
   }
 
-  if (valueRequired(lastname)) {
-    query.find({ lastname: { $regex: ".*" + lastname + ".*", $options: "i" } });
+  if (valueRequired(lastName)) {
+    query.find({ lastName: { $regex: ".*" + lastName + ".*", $options: "i" } });
   }
 
   if (valueRequired(createUser)) {
@@ -539,9 +539,9 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
     }
   }
 
-  if (valueRequired(firstname)) {
+  if (valueRequired(firstName)) {
     query.find({
-      firstname: { $regex: ".*" + firstname + ".*", $options: "i" },
+      firstName: { $regex: ".*" + firstName + ".*", $options: "i" },
     });
   }
 

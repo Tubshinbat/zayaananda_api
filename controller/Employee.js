@@ -193,8 +193,8 @@ const getFullData = async (req, page) => {
 
  
   query.select(select);
-  query.populate({ path: "createUser", select: "firstname -_id" });
-  query.populate({ path: "updateUser", select: "firstname -_id" });
+  query.populate({ path: "createUser", select: "firstName -_id" });
+  query.populate({ path: "updateUser", select: "firstName -_id" });
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
@@ -316,7 +316,7 @@ exports.multDeleteEmployee = asyncHandler(async (req, res, next) => {
   }
 
 
-  await findEmployees.deleteMany({ _id: { $in: ids } });
+  await Employee.deleteMany({ _id: { $in: ids } });
 
   res.status(200).json({
     success: true,
@@ -348,7 +348,7 @@ exports.updateEmployee = asyncHandler(async (req, res) => {
   req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
-  employee = await News.findByIdAndUpdate(req.params.id, req.body, {
+  employee = await Employee.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });

@@ -29,7 +29,7 @@ exports.createBanner = asyncHandler(async (req, res, next) => {
 
 const useSearch = async (userFirstname) => {
   const userData = await User.find({
-    firstname: { $regex: ".*" + userFirstname + ".*", $options: "i" },
+    firstName: { $regex: ".*" + userFirstname + ".*", $options: "i" },
   }).select("_id");
   return userData;
 };
@@ -169,8 +169,8 @@ exports.getFullData = asyncHandler(async (req, res, next) => {
   }
 
   query.select(select);
-  query.populate({ path: "createUser", select: "firstname -_id" });
-  query.populate({ path: "updateUser", select: "firstname -_id" });
+  query.populate({ path: "createUser", select: "firstName -_id" });
+  query.populate({ path: "updateUser", select: "firstName -_id" });
 
   const banners = await query.exec();
 

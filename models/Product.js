@@ -18,7 +18,7 @@ const ProductSchema = new mongoose.Schema({
     type: String,
   },
 
-  images: {
+  pictures: {
     type: [String],
   },
 
@@ -31,10 +31,12 @@ const ProductSchema = new mongoose.Schema({
   discount: {
     type: Number,
     trim: true,
+    default: 0,
   },
 
   details: {
-    type: String
+    type: String,
+    trim: true,
   },
 
   views:{

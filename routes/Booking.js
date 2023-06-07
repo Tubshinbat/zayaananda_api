@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { protect, authorize } = require("../middleware/protect");
 
-const { createBooking, getBookings, multDeleteBooking, getBooking, getCountBooking, excelData } = require("../controller/Booking");
+const { createBooking, getBookings, multDeleteBooking, getBooking, getCountBooking, excelData, updateBooking } = require("../controller/Booking");
 
 router
   .route("/")
@@ -15,7 +15,7 @@ router
   .route("/delete")
   .delete(protect, authorize("admin", "operator"), multDeleteBooking);
 
-router.route("/:id").get(protect, authorize("admin", "operator"), getBooking);
+router.route("/:id").get(protect, authorize("admin", "operator"), getBooking).put(protect, authorize('admin', 'operator'), updateBooking);
 
 router.route('/count').get(protect, authorize("admin", "operator"), getCountBooking)
 

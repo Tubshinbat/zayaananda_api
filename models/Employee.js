@@ -24,7 +24,7 @@ const EmployeeSchema = new mongoose.Schema({
     trim: true,
   },
 
-  image: {
+  picture: {
     type: String,
     default: null,
   },

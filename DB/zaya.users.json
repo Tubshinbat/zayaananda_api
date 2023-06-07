@@ -5,7 +5,7 @@
   "status": true,
   "position": "Teacher",
   "role": "admin",
-  "lastname": "Bayandelger",
+  "lastName": "Bayandelger",
   "username": "Tuvshinbat",
   "email": "tuvshinbat596@gmail.com",
   "phone": 88011197,
@@ -26,7 +26,7 @@
     "$date": "2023-05-24T15:13:27.136Z"
   },
   "__v": 0,
-  "firstname": "Tuvshinbat",
+  "firstName": "Tuvshinbat",
   "entryDate": {
     "$date": "2022-12-07T16:19:58.702Z"
   },

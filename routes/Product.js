@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { protect, authorize } = require("../middleware/protect");
 
-const { getProducts, createProduct, excelData, multDeleteProduct, getProduct, getCountProduct } = require("../controller/Product");
+const { getProducts, createProduct, excelData, multDeleteProduct, getProduct, getCountProduct, updateProduct } = require("../controller/Product");
 
 router
   .route("/")
@@ -15,7 +15,9 @@ router
   .route("/delete")
   .delete(protect, authorize("admin", "operator"), multDeleteProduct);
 
-router.route("/:id").get(protect, authorize("admin", "operator"), getProduct);
+
+
+router.route("/:id").get(protect, authorize("admin", "operator"), getProduct).put(protect, authorize("admin", "operator"), updateProduct);
 
 router.route('/count').get(protect, authorize("admin", "operator"), getCountProduct)
 

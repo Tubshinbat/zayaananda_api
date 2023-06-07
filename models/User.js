@@ -120,7 +120,7 @@ UserSchema.methods.getJsonWebToken = function () {
     {
       id: this._id,
       role: this.role,
-      name: this.firstname,
+      name: this.firstName,
       phone: this.phone,
       email: this.email,
       avatar: this.image,

@@ -237,8 +237,8 @@ const getFullData = async (req, page) => {
     }
   }
 
-  query.populate({ path: "createUser", select: "firstname -_id" });
-  query.populate({ path: "updateUser", select: "firstname -_id" });
+  query.populate({ path: "createUser", select: "firstName -_id" });
+  query.populate({ path: "updateUser", select: "firstName -_id" });
   query.select(select);
 
   const qc = query.toConstructor();
