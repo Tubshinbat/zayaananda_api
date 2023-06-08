@@ -1,0 +1,189 @@
+[{
+  "_id": {
+    "$oid": "64815e4b86125c9402902cbb"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "isPage": false,
+  "name": "Нүүр",
+  "direct": "/",
+  "position": 0,
+  "createAt": {
+    "$date": "2023-06-08T04:51:23.809Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T04:51:23.809Z"
+  },
+  "slug": "nuur",
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "648166d486125c9402902f1f"
+  },
+  "status": true,
+  "isDirect": false,
+  "isModel": true,
+  "isPage": false,
+  "name": "Үйлчилгээ",
+  "model": "services",
+  "position": 2,
+  "createAt": {
+    "$date": "2023-06-08T05:27:48.116Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T05:27:48.116Z"
+  },
+  "slug": "uylchilgee",
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "648166f886125c9402902f42"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "isPage": false,
+  "name": "Сургалт",
+  "direct": "#",
+  "position": 3,
+  "createAt": {
+    "$date": "2023-06-08T05:28:24.924Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T05:28:24.924Z"
+  },
+  "slug": "surgalt2",
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "6481672f86125c9402902f48"
+  },
+  "status": true,
+  "isDirect": false,
+  "isModel": true,
+  "isPage": false,
+  "name": "Зөвлөгөө",
+  "model": "news",
+  "position": 4,
+  "createAt": {
+    "$date": "2023-06-08T05:29:19.863Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T05:29:19.863Z"
+  },
+  "slug": "zovlogoo",
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "6481674f86125c9402902f59"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "isPage": false,
+  "name": "Холбоо барих",
+  "direct": "/contact",
+  "position": 6,
+  "createAt": {
+    "$date": "2023-06-08T05:29:51.790Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T05:29:51.790Z"
+  },
+  "slug": "holboo-barih",
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "64816e5a86125c9402903198"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "isPage": false,
+  "name": "Дэлгүүр",
+  "direct": "/shop",
+  "position": 5,
+  "createAt": {
+    "$date": "2023-06-08T05:59:54.952Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T05:59:54.952Z"
+  },
+  "slug": "delguur",
+  "__v": 0,
+  "parentId": null
+},
+{
+  "_id": {
+    "$oid": "64816e7986125c94029031b3"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "isPage": false,
+  "name": "Онлайн сургалт",
+  "direct": "/online",
+  "parentId": "648166f886125c9402902f42",
+  "position": 0,
+  "createAt": {
+    "$date": "2023-06-08T06:00:25.529Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T06:00:25.529Z"
+  },
+  "slug": "onlayn-surgalt",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "64816e8b86125c94029031b9"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "isPage": false,
+  "name": "Танхимын сургалт",
+  "direct": "/courses",
+  "parentId": "648166f886125c9402902f42",
+  "position": 1,
+  "createAt": {
+    "$date": "2023-06-08T06:00:43.754Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T06:00:43.755Z"
+  },
+  "slug": "tanhimyn-surgalt",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6482197e41d4603d5d1b0200"
+  },
+  "status": true,
+  "isDirect": true,
+  "isModel": false,
+  "isPage": false,
+  "name": "Бидний тухай",
+  "direct": "/abouts",
+  "position": 1,
+  "createAt": {
+    "$date": "2023-06-08T18:10:06.805Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T18:10:06.805Z"
+  },
+  "slug": "bidniy-tuhay",
+  "__v": 0,
+  "parentId": null
+}]

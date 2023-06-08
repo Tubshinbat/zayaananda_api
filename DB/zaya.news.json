@@ -1,0 +1,28 @@
+[{
+  "_id": {
+    "$oid": "64825a8c20625bca0d52d451"
+  },
+  "status": true,
+  "star": false,
+  "name": "test",
+  "details": "<p>test</p>",
+  "type": "default",
+  "pictures": [
+    "1686264455689_4.-stem-3-.jpg"
+  ],
+  "videos": [],
+  "audios": [],
+  "categories": [],
+  "views": 0,
+  "createUser": {
+    "$oid": "635a57ece393ed7df65b1b20"
+  },
+  "createAt": {
+    "$date": "2023-06-08T22:47:40.981Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-08T22:47:40.981Z"
+  },
+  "slug": "test",
+  "__v": 0
+}]

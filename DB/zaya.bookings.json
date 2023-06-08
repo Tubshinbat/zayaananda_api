@@ -1,0 +1,90 @@
+[{
+  "_id": {
+    "$oid": "647f5cdc11eafe6ea6d933d6"
+  },
+  "status": true,
+  "paid": false,
+  "paidType": "bankaccount",
+  "paidAdvance": 111111,
+  "service": {
+    "$oid": "647f13b133605bf341cde156"
+  },
+  "date": {
+    "$date": "2023-06-07T00:00:00.000Z"
+  },
+  "time": "2:00",
+  "bookingMsg": "111111",
+  "firstName": "Tuvshinbat",
+  "lastName": "Bayandelger",
+  "phoneNumber": 88011197,
+  "email": "tuvshinbat596@gmail.com",
+  "userId": {
+    "$oid": "635a57ece393ed7df65b1b20"
+  },
+  "createUser": {
+    "$oid": "635a57ece393ed7df65b1b20"
+  },
+  "createAt": {
+    "$date": "2023-06-06T16:20:44.179Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-06T16:20:44.179Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "647f5d9a11eafe6ea6d9345e"
+  },
+  "status": true,
+  "paid": false,
+  "paidType": "bankaccount",
+  "paidAdvance": 1212,
+  "service": {
+    "$oid": "647f13b133605bf341cde156"
+  },
+  "date": {
+    "$date": "2023-06-22T00:00:00.000Z"
+  },
+  "time": "4:00",
+  "bookingMsg": "1212",
+  "firstName": "Tuvshinbat",
+  "lastName": "Bayandelger",
+  "phoneNumber": 88011197,
+  "email": "tuvshinbat596@gmail.com",
+  "createAt": {
+    "$date": "2023-06-06T16:23:54.151Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-06T16:23:54.151Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "647f6460a09b2e623e12a929"
+  },
+  "status": true,
+  "paid": false,
+  "paidType": "bankaccount",
+  "paidAdvance": 1212,
+  "service": {
+    "$oid": "647f13b133605bf341cde156"
+  },
+  "date": {
+    "$date": "2023-06-07T00:00:00.000Z"
+  },
+  "time": "7:00",
+  "bookingMsg": "1212",
+  "firstName": "Bayandelger",
+  "lastName": "tuvshinbat",
+  "phoneNumber": 88011197,
+  "email": "tuvshinbat596@gmail.com",
+  "createAt": {
+    "$date": "2023-06-06T16:52:48.804Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-06T16:52:48.804Z"
+  },
+  "__v": 0
+}]

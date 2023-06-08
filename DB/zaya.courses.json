@@ -1,0 +1,31 @@
+[{
+  "_id": {
+    "$oid": "647e18fd94c741cce2dff45d"
+  },
+  "status": false,
+  "name": "Байгууллагын бүтэц",
+  "details": "<p>1122</p>",
+  "slug": "bayguullagyn-butec",
+  "pictures": [
+    "1685985532564_350242519_587486523485518_4677096544430601314_n.jpg"
+  ],
+  "video": "1685985531086_343405764_188486790695402_1830536748411424258_n.mp4",
+  "views": 1,
+  "parentId": {
+    "$oid": "647cd7c6ad99c8f3bd07e3fc"
+  },
+  "position": 0,
+  "createUser": {
+    "$oid": "635a57ece393ed7df65b1b20"
+  },
+  "createAt": {
+    "$date": "2023-06-05T17:18:53.631Z"
+  },
+  "updateAt": {
+    "$date": "2023-06-05T17:20:58.299Z"
+  },
+  "__v": 0,
+  "updateUser": {
+    "$oid": "635a57ece393ed7df65b1b20"
+  }
+}]
