@@ -6,7 +6,7 @@ const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const { imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
-const { RegexOptions, useServiceSearch } = require("../lib/searchOfterModel")
+const { RegexOptions, useServiceSearch } = require("../lib/searchOfterModel");
 
 exports.createEmployee = asyncHandler(async (req, res) => {
   req.body.status = req.body.status || true;
@@ -22,7 +22,7 @@ exports.createEmployee = asyncHandler(async (req, res) => {
 exports.getEmployees = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 25;
-  let sort = req.query.sort || { createAt: -1 };
+  let sort = req.query.sort || { createAt: 1 };
   const select = req.query.select;
 
   // DATA FIELDS
@@ -41,16 +41,16 @@ exports.getEmployees = asyncHandler(async (req, res, next) => {
     } else query.where("status").equals(status);
   }
 
-  if(valueRequired(lastName)){
-    query.find({lastName: RegexOptions(lastName)})
+  if (valueRequired(lastName)) {
+    query.find({ lastName: RegexOptions(lastName) });
   }
 
-  if(valueRequired(firstName)){
-    query.find({firstName: RegexOptions(firstName)})
+  if (valueRequired(firstName)) {
+    query.find({ firstName: RegexOptions(firstName) });
   }
 
-  if(valueRequired(position)){
-    query.find({position: RegexOptions(position)})
+  if (valueRequired(position)) {
+    query.find({ position: RegexOptions(position) });
   }
 
   if (valueRequired(createUser)) {
@@ -137,16 +137,16 @@ const getFullData = async (req, page) => {
     } else query.where("status").equals(status);
   }
 
-  if(valueRequired(lastName)){
-    query.find({lastName: RegexOptions(lastName)})
+  if (valueRequired(lastName)) {
+    query.find({ lastName: RegexOptions(lastName) });
   }
 
-  if(valueRequired(firstName)){
-    query.find({firstName: RegexOptions(firstName)})
+  if (valueRequired(firstName)) {
+    query.find({ firstName: RegexOptions(firstName) });
   }
 
-  if(valueRequired(position)){
-    query.find({position: RegexOptions(position)})
+  if (valueRequired(position)) {
+    query.find({ position: RegexOptions(position) });
   }
 
   if (valueRequired(createUser)) {
@@ -191,7 +191,6 @@ const getFullData = async (req, page) => {
     }
   }
 
- 
   query.select(select);
   query.populate({ path: "createUser", select: "firstName -_id" });
   query.populate({ path: "updateUser", select: "firstName -_id" });
@@ -214,77 +213,76 @@ exports.excelData = asyncHandler(async (req, res) => {
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
 
-   // DATA FIELDS
-   const status = req.query.status;
-   const lastName = req.query.lastName;
-   const firstName = req.query.firstName;
-   const position = req.query.position;
-   const createUser = req.query.createUser;
-   const updateUser = req.query.updateUser;
- 
-   const query = Employee.find();
- 
-   if (valueRequired(status)) {
-     if (status.split(",").length > 1) {
-       query.where("status").in(status.split(","));
-     } else query.where("status").equals(status);
-   }
- 
-   if(valueRequired(lastName)){
-     query.find({lastName: RegexOptions(lastName)})
-   }
- 
-   if(valueRequired(firstName)){
-     query.find({firstName: RegexOptions(firstName)})
-   }
- 
-   if(valueRequired(position)){
-     query.find({position: RegexOptions(position)})
-   }
- 
-   if (valueRequired(createUser)) {
-     const userData = await useSearch(createUser);
-     if (userData) {
-       query.where("createUser").in(userData);
-     }
-   }
- 
-   if (valueRequired(updateUser)) {
-     const userData = await useSearch(updateUser);
-     if (userData) {
-       query.where("updateUser").in(userData);
-     }
-   }
- 
-   if (valueRequired(sort)) {
-     if (typeof sort === "string") {
-       const spliteSort = sort.split(":");
-       if (spliteSort.length > 0) {
-         let convertSort = {};
-         if (spliteSort[1] === "ascend") {
-           convertSort = { [spliteSort[0]]: 1 };
-         } else {
-           convertSort = { [spliteSort[0]]: -1 };
-         }
-         if (spliteSort[0] != "undefined") query.sort(convertSort);
-       }
- 
-       const splite = sort.split("_");
-       if (splite.length > 0) {
-         let convertSort = {};
-         if (splite[1] === "ascend") {
-           convertSort = { [splite[0]]: 1 };
-         } else {
-           convertSort = { [splite[0]]: -1 };
-         }
-         if (splite[0] != "undefined") query.sort(convertSort);
-       }
-     } else {
-       query.sort(sort);
-     }
-   }
+  // DATA FIELDS
+  const status = req.query.status;
+  const lastName = req.query.lastName;
+  const firstName = req.query.firstName;
+  const position = req.query.position;
+  const createUser = req.query.createUser;
+  const updateUser = req.query.updateUser;
 
-  
+  const query = Employee.find();
+
+  if (valueRequired(status)) {
+    if (status.split(",").length > 1) {
+      query.where("status").in(status.split(","));
+    } else query.where("status").equals(status);
+  }
+
+  if (valueRequired(lastName)) {
+    query.find({ lastName: RegexOptions(lastName) });
+  }
+
+  if (valueRequired(firstName)) {
+    query.find({ firstName: RegexOptions(firstName) });
+  }
+
+  if (valueRequired(position)) {
+    query.find({ position: RegexOptions(position) });
+  }
+
+  if (valueRequired(createUser)) {
+    const userData = await useSearch(createUser);
+    if (userData) {
+      query.where("createUser").in(userData);
+    }
+  }
+
+  if (valueRequired(updateUser)) {
+    const userData = await useSearch(updateUser);
+    if (userData) {
+      query.where("updateUser").in(userData);
+    }
+  }
+
+  if (valueRequired(sort)) {
+    if (typeof sort === "string") {
+      const spliteSort = sort.split(":");
+      if (spliteSort.length > 0) {
+        let convertSort = {};
+        if (spliteSort[1] === "ascend") {
+          convertSort = { [spliteSort[0]]: 1 };
+        } else {
+          convertSort = { [spliteSort[0]]: -1 };
+        }
+        if (spliteSort[0] != "undefined") query.sort(convertSort);
+      }
+
+      const splite = sort.split("_");
+      if (splite.length > 0) {
+        let convertSort = {};
+        if (splite[1] === "ascend") {
+          convertSort = { [splite[0]]: 1 };
+        } else {
+          convertSort = { [splite[0]]: -1 };
+        }
+        if (splite[0] != "undefined") query.sort(convertSort);
+      }
+    } else {
+      query.sort(sort);
+    }
+  }
+
   query.select(select);
   query.populate("createUser");
   query.populate("updateUser");
@@ -315,7 +313,6 @@ exports.multDeleteEmployee = asyncHandler(async (req, res, next) => {
     throw new MyError("Таны сонгосон өгөгдөлүүд олдсонгүй", 400);
   }
 
-
   await Employee.deleteMany({ _id: { $in: ids } });
 
   res.status(200).json({
@@ -324,8 +321,9 @@ exports.multDeleteEmployee = asyncHandler(async (req, res, next) => {
 });
 
 exports.getEmployee = asyncHandler(async (req, res, next) => {
-  const employee = await Employee.findByIdAndUpdate(req.params.id).populate('createUser').populate('updateUser'); 
-
+  const employee = await Employee.findByIdAndUpdate(req.params.id)
+    .populate("createUser")
+    .populate("updateUser");
 
   if (!employee) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
@@ -344,7 +342,6 @@ exports.updateEmployee = asyncHandler(async (req, res) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
- 
   req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
