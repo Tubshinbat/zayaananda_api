@@ -5,6 +5,8 @@ const { slugify } = require("transliteration");
 const { valueRequired } = require("../lib/check");
 
 exports.createMenu = asyncHandler(async (req, res, next) => {
+  console.log(req.body);
+
   const parentId = req.body.parentId || null;
   const name = req.body.name;
   let position = 0;
@@ -88,10 +90,15 @@ exports.getMenus = asyncHandler(async (req, res, next) => {
 });
 
 exports.getMenu = asyncHandler(async (req, res, next) => {
-  const menu = await Menu.findById(req.params.id);
+  let menu = "";
+  if (req.query && req.query.direct) {
+    menu = await Menu.findOne({ direct: `/${req.query.direct}` });
+  } else {
+    menu = await Menu.findById(req.params.id);
+  }
 
   if (!menu) {
-    throw new MyError(req.params.id + " Тус мэдээний ангилал олдсонгүй.", 404);
+    throw new MyError(" Тус мэдээний ангилал олдсонгүй.", 404);
   }
 
   res.status(200).json({
@@ -235,6 +242,10 @@ exports.changePosition = asyncHandler(async (req, res) => {
 exports.updateMenu = asyncHandler(async (req, res) => {
   if (!valueRequired(req.body.name)) {
     throw new MyError("Талбарыг бөгөлнө үү", 400);
+  }
+
+  if (!valueRequired(req.body.cover)) {
+    req.body.cover = "";
   }
 
   const result = await Menu.findById(req.params.id);

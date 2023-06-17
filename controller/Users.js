@@ -9,6 +9,7 @@ const fs = require("fs");
 const moment = require("moment");
 const { fileUpload, imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
+const axios = require("axios");
 
 // OldUSer Check
 exports.oldUser = asyncHandler(async (req, res, next) => {
@@ -85,7 +86,18 @@ mcljrmvbuy8H1sxKTY56Rbg=
 
 // Register
 exports.register = asyncHandler(async (req, res, next) => {
-  req.body.email = req.body.email.toLowerCase();
+  const phoneNumber = req.body.phoneNumber;
+
+  if (valueRequired(req.body.email))
+    req.body.email = req.body.email.toLowerCase();
+
+  if (valueRequired(phoneNumber)) {
+    const uniquePhoneNumber = await User.find({ phoneNumber });
+    if (uniquePhoneNumber.length > 0) {
+      throw new MyError("Утасны дугаар бүртгэлтэй байна");
+    }
+  }
+
   const user = await User.create(req.body);
   const jwt = user.getJsonWebToken();
 
@@ -215,29 +227,37 @@ exports.getFullData = asyncHandler(async (req, res) => {
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
-  let { email, password } = req.body;
-  email = email.toLowerCase();
+  let { email, password, phoneNumber } = req.body;
+  if (valueRequired(email)) email = email.toLowerCase();
+  console.log(req.body);
   // Оролтыгоо шалгана
-  if (!email || !password)
-    throw new MyError("Имэйл болон нууц үгээ дамжуулна уу", 400);
 
-  // Тухайн хэрэглэгчийг хайна
-  const user = await User.findOne({ email }).select("+password");
-
-  if (!user) {
-    throw new MyError("Имэйл болон нууц үгээ зөв оруулна уу", 401);
+  if (!email || !password) {
+    if (!password || !phoneNumber) {
+      throw new MyError(
+        "Имэйл эсвэл утасны дугаар болон нууц үгээ оруулна уу",
+        400
+      );
+    }
   }
 
-  // if (user.oldUserLogin === false)
-  //   throw new MyError(
-  //     "Вэбсайт шинжлэгдсэнтэй холбоотой та нууц үгээ мартсан дээр дарж шинэчлэн үү",
-  //     401
-  //   );
+  // Тухайн хэрэглэгчийг хайна
+  let user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    user = await User.findOne({ phoneNumber }).select("+password");
+    if (!user) {
+      throw new MyError("Имэйл болон нууц үгээ зөв оруулна уу", 401);
+    }
+  }
 
   const ok = await user.checkPassword(password);
 
   if (!ok) {
-    throw new MyError("Имэйл болон нууц үгээ зөв оруулна уу", 402);
+    throw new MyError(
+      "Имэйл эсвлэ утасны дугаар болон нууц үгээ зөв оруулна уу",
+      402
+    );
   }
 
   if (user.role === "user") {
@@ -442,7 +462,7 @@ exports.emailCheck = asyncHandler(async (req, res) => {
 exports.phoneCheck = asyncHandler(async (req, res) => {
   const phoneNumber = parseInt(req.body.phoneNumber) || 0;
   const user = await User.findOne({ status: true })
-    .where("phone")
+    .where("phoneNumber")
     .equals(phoneNumber);
 
   if (!user) {
@@ -759,14 +779,14 @@ exports.multDeleteUsers = asyncHandler(async (req, res, next) => {
 });
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
-  if (!req.body.email) {
-    throw new MyError(" Имэйл хаягаа дамжуулна уу.", 400);
+  if (!req.body.phoneNumber) {
+    throw new MyError(" Утасны дугаараа оруулна уу.", 400);
   }
 
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ phoneNumber: req.body.phoneNumber });
 
   if (!user) {
-    throw new MyError(req.body.email + " Имэйл хаягаа дахин шалгана уу.", 400);
+    throw new MyError(" Утасны дугаараа шалгана уу.", 400);
   }
 
   const resetToken = user.generatePasswordChangeToken();
@@ -777,24 +797,31 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   const message = `Сайн байна уу? Энэ таны баталгаажуулах код <br> <br> ${resetToken}<br> <br> өдрийг сайхан өнгөрүүлээрэй!`;
 
   // Имэйл илгээнэ
-  const info = await sendEmail({
-    email: user.email,
-    subject: "Нууц үг сэргээх хүсэлт",
-    message,
-  });
+  // const info = await sendEmail({
+  //   email: user.email,
+  //   subject: "Нууц үг сэргээх хүсэлт",
+  //   message,
+  // });
+
+  console.log(resetToken);
+
+  await fetch(
+    `http://web2sms.skytel.mn/apiSend?token=8fdfbfdd433e4973d3fb5cce159c275ab66523b6&sendto=${req.body.phoneNumber}&message=${message}`
+  );
 
   res.status(200).json({
     success: true,
     resetToken,
     console: message,
-    message: "Таны имэйл хаягруу нууц үг солих линк илгээлээ",
   });
 });
+
+exports.otpCheck = asyncHandler();
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   if (!req.body.otp || !req.body.password) {
     throw new MyError(
-      "Баталгаажуулах код болон шинэж нууц үгээ оруулна уу.",
+      "Баталгаажуулах код болон шинэ нууц үгээ оруулна уу.",
       400
     );
   }
@@ -812,7 +839,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   }
 
   user.password = req.body.password;
-  user.email = req.body.email.toLowerCase();
+  user.phoneNumber = req.body.phoneNumber;
   user.oldUserLogin = true;
   user.resetPassword = undefined;
   user.resetPasswordExpire = undefined;

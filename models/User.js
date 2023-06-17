@@ -10,16 +10,11 @@ const UserSchema = new mongoose.Schema({
     default: true,
   },
 
-  position: {
-    type: String,
-    trim: true,
-  },
-
   role: {
     type: String,
     required: [true, "Хэрэглэгчийн эрхийг сонгоно уу"],
     enum: ["user", "operator", "admin"],
-    default: "operator",
+    default: "user",
   },
 
   lastName: {
@@ -41,7 +36,6 @@ const UserSchema = new mongoose.Schema({
 
   email: {
     type: String,
-    required: [true, "Хэрэглэгчинй имэйл хаягийг оруулж өгнө үү"],
     unique: true,
     trim: true,
     match: [
@@ -53,6 +47,7 @@ const UserSchema = new mongoose.Schema({
   phoneNumber: {
     type: Number,
     unique: true,
+    trim: true,
     required: [true, "Утасны дугаараа оруулна уу"],
   },
 
@@ -121,7 +116,7 @@ UserSchema.methods.getJsonWebToken = function () {
       id: this._id,
       role: this.role,
       name: this.firstName,
-      phone: this.phone,
+      phoneNumber: this.phoneNumber,
       email: this.email,
       avatar: this.image,
     },

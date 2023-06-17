@@ -26,6 +26,10 @@ const MenuSchema = new mongoose.Schema({
     default: false,
   },
 
+  cover: {
+    type: String,
+  },
+
   name: {
     type: String,
   },

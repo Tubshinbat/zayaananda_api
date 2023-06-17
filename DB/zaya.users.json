@@ -5,10 +5,8 @@
   "status": true,
   "position": "Teacher",
   "role": "admin",
-  "lastName": "Bayandelger",
   "username": "Tuvshinbat",
   "email": "tuvshinbat596@gmail.com",
-  "phone": 88011197,
   "image": null,
   "gender": "male",
   "age": 0,
@@ -26,11 +24,13 @@
     "$date": "2023-05-24T15:13:27.136Z"
   },
   "__v": 0,
-  "firstName": "Tuvshinbat",
   "entryDate": {
     "$date": "2022-12-07T16:19:58.702Z"
   },
   "updateUser": {
     "$oid": "635a57ece393ed7df65b1b20"
-  }
+  },
+  "firstName": "Tuvshinbat",
+  "lastName": "Bayandelger",
+  "phoneNumber": 88011197
 }]
