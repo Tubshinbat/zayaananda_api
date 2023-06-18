@@ -423,12 +423,15 @@ exports.tokenCheckAlways = asyncHandler(async (req, res, next) => {
   req.userId = tokenObject.id;
   req.userRole = tokenObject.role;
 
+  const user = await User.findById(tokenObject.id);
+
   res.status(200).json({
     success: true,
     role: tokenObject.role,
     userId: tokenObject.id,
     avatar: tokenObject.avatar,
     name: tokenObject.name,
+    user,
   });
 });
 
@@ -816,7 +819,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.otpCheck = asyncHandler();
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   if (!req.body.otp || !req.body.password) {
