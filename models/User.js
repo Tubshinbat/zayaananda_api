@@ -72,6 +72,10 @@ const UserSchema = new mongoose.Schema({
     default: Date.now,
   },
 
+  address: {
+    type: String,
+  },
+
   password: {
     type: String,
     minlength: [8, "Нууц үг 8 - аас дээш тэмэгдээс бүтэх ёстой."],

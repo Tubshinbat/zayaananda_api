@@ -18,7 +18,9 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
       .where("date")
       .equals(req.body.date)
       .where("time")
-      .equals(req.body.time);
+      .equals(req.body.time)
+      .where("service")
+      .equals(req.body.service);
 
     const currentDate = new Date().toJSON().slice(0, 10);
 
@@ -56,6 +58,50 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     data: booking,
+  });
+});
+
+exports.checkBooking = asyncHandler(async (req, res, next) => {
+  req.body.paidAdvance = parseInt(req.body.paidAdvance) || 0;
+
+  if (valueRequired(req.body.time) && valueRequired(req.body.date)) {
+    const sameDate = await Booking.find({})
+      .where("status")
+      .equals(true)
+      .where("date")
+      .equals(req.body.date)
+      .where("time")
+      .equals(req.body.time)
+      .where("service")
+      .equals(req.body.service);
+
+    const currentDate = new Date().toJSON().slice(0, 10);
+
+    if (req.body.date < currentDate) {
+      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.");
+    }
+
+    if (sameDate.length > 0)
+      throw new MyError("Тухайн цаг дээр захиалга үүссэн байна.");
+  } else if (!valueRequired(req.body.time) || !valueRequired(req.body.date)) {
+    throw new MyError("Цаг болон өдрөө заавал оруулна уу");
+  }
+
+  if (req.body.userId) {
+    const user = await User.findById(req.body.userId);
+    req.body.lastName = req.body.lastName || user.lastName;
+    req.body.firstName = req.body.firstName || user.firstName;
+    req.body.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+    req.body.email = req.body.email || user.email;
+    req.body.createUser = req.body.userId;
+  }
+
+  req.body.paid = (valueRequired(req.body.paid) && req.body.paid) || false;
+
+  const lastOrderNumber = await Booking.findOne({}).sort({ bookingNumber: -1 });
+
+  res.status(200).json({
+    success: true,
   });
 });
 

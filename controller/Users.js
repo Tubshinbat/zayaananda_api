@@ -10,6 +10,7 @@ const moment = require("moment");
 const { fileUpload, imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
 const axios = require("axios");
+const { findById } = require("../models/User");
 
 // OldUSer Check
 exports.oldUser = asyncHandler(async (req, res, next) => {
@@ -255,7 +256,7 @@ exports.login = asyncHandler(async (req, res, next) => {
 
   if (!ok) {
     throw new MyError(
-      "Имэйл эсвлэ утасны дугаар болон нууц үгээ зөв оруулна уу",
+      "Имэйл эсвэл утасны дугаар болон нууц үгээ зөв оруулна уу",
       402
     );
   }
@@ -355,9 +356,15 @@ exports.getUserPasswordChange = asyncHandler(async (req, res, next) => {
   if (req.userId !== tokenObject.id) {
     throw new MyError("Уучлаарай хандах боломжгүй байна..", 401);
   }
-
+  const oldPassword = req.body.oldPassword;
   const password = req.body.password;
   const confPassword = req.body.confPassword;
+
+  const user = await User.findById(req.userId);
+
+  if (!user) {
+    throw new MyError("Холболтоо шалгана уу", 401);
+  }
 
   if (password !== confPassword)
     throw new MyError(
@@ -367,7 +374,6 @@ exports.getUserPasswordChange = asyncHandler(async (req, res, next) => {
 
   if (!password) throw new MyError(`Нууц үгээ оруулна уу ${error}`, 401);
 
-  const user = await User.findById(req.userId);
   user.password = req.body.password;
   await user.save();
 
@@ -386,16 +392,14 @@ exports.getUseUpdate = asyncHandler(async (req, res, next) => {
   }
   if (req.body.email) req.body.email = req.body.email.toLowerCase();
   req.body.age = parseInt(req.body.age) || 0;
-  req.body.phone = parseInt(req.body.phone) || null;
+  req.body.phoneNumber = parseInt(req.body.phoneNumber) || null;
 
   delete req.body.status;
-  delete req.body.wallet;
   delete req.body.role;
   delete req.body.password;
   delete req.body.confirmPassword;
 
   // if (valueRequired(req.body.gender) === false) req.body.gender = "other";
-
   const user = await User.findByIdAndUpdate(req.userId, req.body, {
     new: true,
     runValidators: true,
@@ -818,7 +822,6 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     console: message,
   });
 });
-
 
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   if (!req.body.otp || !req.body.password) {

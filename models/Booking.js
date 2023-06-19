@@ -75,7 +75,6 @@ const BookingSchema = new mongoose.Schema({
 
   email: {
     type: String,
-    required: [true, "Имэйл хаягаа оруулна уу"],
     trim: true,
     match: [
       /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
