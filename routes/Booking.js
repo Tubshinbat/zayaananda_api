@@ -10,6 +10,7 @@ const {
   getCountBooking,
   excelData,
   updateBooking,
+  checkBooking,
 } = require("../controller/Booking");
 
 router
@@ -17,7 +18,7 @@ router
   .post(createBooking)
   .get(protect, authorize("admin", "operator"), getBookings);
 
-router.post("/checkbooking");
+router.post("/checkbooking", checkBooking);
 
 router.route("/excel").get(protect, authorize("admin", "operator"), excelData);
 

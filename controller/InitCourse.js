@@ -127,6 +127,8 @@ exports.getInitCourses = asyncHandler(async (req, res) => {
 
   query.populate("createUser");
   query.populate("updateUser");
+  query.populate("videoCount");
+  query.populate("paidMember");
   query.select(select);
 
   const qc = query.toConstructor();
@@ -395,7 +397,10 @@ exports.multDeleteInitCourse = asyncHandler(async (req, res) => {
 exports.getInitCourse = asyncHandler(async (req, res) => {
   const initCourse = await InitCourse.findByIdAndUpdate(req.params.id)
     .populate("createUser")
-    .populate("updateUser");
+    .populate("updateUser")
+    .populate("videoCount")
+    .populate("courses")
+    .populate("paidMember");
 
   if (!initCourse) {
     throw new MyError("Өгөгдөл олдсонгүй", 404);

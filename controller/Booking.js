@@ -20,12 +20,21 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
       .where("time")
       .equals(req.body.time)
       .where("service")
-      .equals(req.body.service);
+      .in(req.body.service);
 
     const currentDate = new Date().toJSON().slice(0, 10);
 
     if (req.body.date < currentDate) {
       throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.");
+    }
+
+    const time = new Date();
+    const timeNow = parseInt(
+      time.toLocaleString("en-US", { hour: "numeric", hour12: true })
+    );
+
+    if (req.body.date === currentDate && parseInt(req.body.time) <= timeNow) {
+      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.", 404);
     }
 
     if (sameDate.length > 0)
@@ -47,7 +56,7 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
 
   const lastOrderNumber = await Booking.findOne({}).sort({ bookingNumber: -1 });
 
-  if (lastOrderNumber) {
+  if (lastOrderNumber && lastOrderNumber.bookingNumber) {
     req.body.bookingNumber = parseInt(lastOrderNumber.bookingNumber) + 1;
   } else {
     req.body.bookingNumber = 1;
@@ -69,22 +78,30 @@ exports.checkBooking = asyncHandler(async (req, res, next) => {
       .where("status")
       .equals(true)
       .where("date")
-      .equals(req.body.date)
+      .in(req.body.date)
       .where("time")
       .equals(req.body.time)
       .where("service")
-      .equals(req.body.service);
+      .in(req.body.service);
 
     const currentDate = new Date().toJSON().slice(0, 10);
 
     if (req.body.date < currentDate) {
-      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.");
+      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.", 404);
+    }
+    const time = new Date();
+    const timeNow = parseInt(
+      time.toLocaleString("en-US", { hour: "numeric", hour12: true })
+    );
+
+    if (req.body.date === currentDate && parseInt(req.body.time) <= timeNow) {
+      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.", 404);
     }
 
     if (sameDate.length > 0)
-      throw new MyError("Тухайн цаг дээр захиалга үүссэн байна.");
+      throw new MyError("Тухайн цаг дээр захиалга үүссэн байна.", 404);
   } else if (!valueRequired(req.body.time) || !valueRequired(req.body.date)) {
-    throw new MyError("Цаг болон өдрөө заавал оруулна уу");
+    throw new MyError("Цаг болон өдрөө заавал оруулна уу", 404);
   }
 
   if (req.body.userId) {

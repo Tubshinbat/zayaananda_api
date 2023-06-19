@@ -6,6 +6,7 @@ const { imageDelete, multDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
 const { slugify } = require("transliteration");
 const { RegexOptions, useInitCourse } = require("../lib/searchOfterModel");
+const fs = require("fs");
 
 exports.createCourse = asyncHandler(async (req, res) => {
   req.body.createUser = req.userId;
@@ -37,6 +38,31 @@ exports.createCourse = asyncHandler(async (req, res) => {
     success: true,
     data: course,
   });
+});
+
+exports.getVideo = asyncHandler(async (req, res) => {
+  const range = req.headers.range;
+  if (!range) {
+    throw new MyError("Requires Range header", 400);
+  }
+  const videoPath = `./public/upload/${req.params.videoName}`;
+  const videoSize = fs.statSync(videoPath).size;
+
+  const CHUNK_SIZE = 10 ** 6; // 1MB
+  const start = Number(range.replace(/\D/g, ""));
+  const end = Math.min(start + CHUNK_SIZE, videoSize - 1);
+
+  const contentLength = end - start + 1;
+  const headers = {
+    "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+    "Accept-Ranges": "bytes",
+    "Content-Length": contentLength,
+    "Content-Type": "video/mp4",
+  };
+
+  res.writeHead(206, headers);
+  const videoStream = fs.createReadStream(videoPath, { start, end });
+  videoStream.pipe(res);
 });
 
 exports.getCourses = asyncHandler(async (req, res) => {
