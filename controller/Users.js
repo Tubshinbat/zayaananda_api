@@ -653,6 +653,21 @@ exports.getUser = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.getUserCourses = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.query.userId)
+    .where("courses")
+    .in(req.query.courseId);
+
+  if (!user) {
+    throw new MyError("Тухайн хичээлийг худалдаж аваагүй байна.", 404);
+  }
+
+  res.status(200).json({
+    success: true,
+    data: user,
+  });
+});
+
 exports.getCount = asyncHandler(async (req, res, next) => {
   const userCount = await User.count();
   res.status(200).json({

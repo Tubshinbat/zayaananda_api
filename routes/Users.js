@@ -27,6 +27,7 @@ const {
   getFullData,
   getUserPasswordChange,
   getJwt,
+  getUserCourses,
 } = require("../controller/Users");
 
 router.route("/login").post(login);
@@ -61,6 +62,8 @@ router
 router.route("/count").get(protect, authorize("admin", "operator"), getCount);
 router.route("/phone").post(phoneCheck);
 router.route("/email").post(emailCheck);
+router.route("/coursecheck").get(protect, getUserCourses);
+
 router
   .route("/changepassword")
   .post(protect, authorize("admin"), changePassword);
