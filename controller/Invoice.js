@@ -1,5 +1,4 @@
-const News = require("../models/News");
-const NewsCategories = require("../models/NewsCategories");
+const Booking = require("../models/Booking");
 const User = require("../models/User");
 const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
@@ -7,52 +6,145 @@ const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const { imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
-const { slugify } = require("transliteration");
+const { RegexOptions, useServiceSearch } = require("../lib/searchOfterModel");
 
-exports.createNews = asyncHandler(async (req, res, next) => {
-  req.body.createUser = req.userId;
-  req.body.status = (valueRequired(req.body.status) && req.body.status) || true;
-  req.body.star = (valueRequired(req.body.star) && req.body.star) || false;
+exports.createBooking = asyncHandler(async (req, res, next) => {
+  req.body.paidAdvance = parseInt(req.body.paidAdvance) || 0;
 
-  const news = await News.create(req.body);
+  if (valueRequired(req.body.time) && valueRequired(req.body.date)) {
+    const sameDate = await Booking.find({})
+      .where("status")
+      .equals(true)
+      .where("date")
+      .equals(req.body.date)
+      .where("time")
+      .equals(req.body.time)
+      .where("service")
+      .in(req.body.service);
+
+    const currentDate = new Date().toJSON().slice(0, 10);
+
+    if (req.body.date < currentDate) {
+      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.");
+    }
+
+    const time = new Date();
+    const timeNow = parseInt(
+      time.toLocaleString("en-US", { hour: "numeric", hour12: true })
+    );
+
+    if (req.body.date === currentDate && parseInt(req.body.time) <= timeNow) {
+      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.", 404);
+    }
+
+    if (sameDate.length > 0)
+      throw new MyError("Тухайн цаг дээр захиалга үүссэн байна.");
+  } else if (!valueRequired(req.body.time) || !valueRequired(req.body.date)) {
+    throw new MyError("Цаг болон өдрөө заавал оруулна уу");
+  }
+
+  if (req.body.userId) {
+    const user = await User.findById(req.body.userId);
+    req.body.lastName = req.body.lastName || user.lastName;
+    req.body.firstName = req.body.firstName || user.firstName;
+    req.body.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+    req.body.email = req.body.email || user.email;
+    req.body.createUser = req.body.userId;
+  }
+
+  req.body.paid = (valueRequired(req.body.paid) && req.body.paid) || false;
+
+  const lastOrderNumber = await Booking.findOne({}).sort({ bookingNumber: -1 });
+
+  if (lastOrderNumber && lastOrderNumber.bookingNumber) {
+    req.body.bookingNumber = parseInt(lastOrderNumber.bookingNumber) + 1;
+  } else {
+    req.body.bookingNumber = 1;
+  }
+
+  const booking = await Booking.create(req.body);
 
   res.status(200).json({
     success: true,
-    data: news,
+    data: booking,
   });
 });
 
-const newsCategorySearch = async (key) => {
-  const ids = await NewsCategories.find({
-    name: { $regex: ".*" + key + ".*", $options: "i" },
-  }).select("_id");
-  return ids;
-};
+exports.checkBooking = asyncHandler(async (req, res, next) => {
+  req.body.paidAdvance = parseInt(req.body.paidAdvance) || 0;
 
-const useSearch = async (userFirstname) => {
-  const userData = await User.find({
-    firstName: { $regex: ".*" + userFirstname + ".*", $options: "i" },
-  }).select("_id");
-  return userData;
-};
+  if (valueRequired(req.body.time) && valueRequired(req.body.date)) {
+    const sameDate = await Booking.find({})
+      .where("status")
+      .equals(true)
+      .where("date")
+      .in(req.body.date)
+      .where("time")
+      .equals(req.body.time)
+      .where("service")
+      .in(req.body.service);
 
-exports.getNews = asyncHandler(async (req, res, next) => {
+    const currentDate = new Date().toJSON().slice(0, 10);
+
+    if (req.body.date < currentDate) {
+      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.", 404);
+    }
+    const time = new Date();
+    const timeNow = parseInt(
+      time.toLocaleString("en-US", { hour: "numeric", hour12: true })
+    );
+
+    if (req.body.date === currentDate && parseInt(req.body.time) <= timeNow) {
+      throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.", 404);
+    }
+
+    if (sameDate.length > 0)
+      throw new MyError("Тухайн цаг дээр захиалга үүссэн байна.", 404);
+  } else if (!valueRequired(req.body.time) || !valueRequired(req.body.date)) {
+    throw new MyError("Цаг болон өдрөө заавал оруулна уу", 404);
+  }
+
+  if (req.body.userId) {
+    const user = await User.findById(req.body.userId);
+    req.body.lastName = req.body.lastName || user.lastName;
+    req.body.firstName = req.body.firstName || user.firstName;
+    req.body.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+    req.body.email = req.body.email || user.email;
+    req.body.createUser = req.body.userId;
+  }
+
+  req.body.paid = (valueRequired(req.body.paid) && req.body.paid) || false;
+
+  const lastOrderNumber = await Booking.findOne({}).sort({ bookingNumber: -1 });
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+exports.getBookings = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 25;
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
 
-  // NEWS FIELDS
+  // DATA FIELDS
   const status = req.query.status;
-  const star = req.query.star;
-  const name = req.query.name;
-  const type = req.query.type;
-  const categories = req.query.categories;
-  const category = req.query.category;
+  const paid = req.query.paid;
+  const bookingNumber = req.query.bookingNumber;
+  const paidType = req.query.paidType;
+  const service = req.query.serivce;
+  const date = req.query.date;
+  const time = req.query.time;
+  const bookingMsg = req.query.bookingMsg;
+  const firstName = req.query.firstName;
+  const lastName = req.query.lastName;
+  const phoneNumber = req.query.phoneNumber;
+  const email = req.query.email;
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
 
-  const query = News.find();
+  const query = Booking.find();
 
   if (valueRequired(status)) {
     if (status.split(",").length > 1) {
@@ -60,27 +152,53 @@ exports.getNews = asyncHandler(async (req, res, next) => {
     } else query.where("status").equals(status);
   }
 
-  if (valueRequired(star)) {
-    const splitData = star.split(",");
+  if (valueRequired(paid)) {
+    const splitData = paid.split(",");
     if (splitData.length > 1) {
-      query.where("star").in(star.split(","));
-    } else query.where("star").equals(star);
+      query.where("paid").in(paid.split(","));
+    } else query.where("paid").equals(paid);
   }
 
-  if (valueRequired(type)) {
-    query.find({ type: { $regex: ".*" + type + ".*", $options: "i" } });
+  if (valueRequired(paidType)) {
+    query.find({ paidType });
   }
 
-  if (valueRequired(category)) {
-    const catIds = await newsCategorySearch(category);
-    console.log(catIds);
-    if (catIds.length > 0) {
-      query.where("categories").in(catIds);
-    }
+  if (valueRequired(bookingNumber)) {
+    query.find({ bookingNumber: RegexOptions(bookingNumber) });
   }
 
-  if (valueRequired(name))
-    query.find({ name: { $regex: ".*" + name + ".*", $options: "i" } });
+  if (valueRequired(service)) {
+    const serviceIds = useServiceSearch(service);
+    query.find({}).where("service").in(serviceIds);
+  }
+
+  if (valueRequired(date)) {
+    query.find({ date });
+  }
+
+  if (valueRequired(time)) {
+    query.find({ time });
+  }
+
+  if (valueRequired(bookingMsg)) {
+    query.find({ bookingMsg: RegexOptions(bookingMsg) });
+  }
+
+  if (valueRequired(firstName)) {
+    query.find({ firstName: RegexOptions(firstName) });
+  }
+
+  if (valueRequired(lastName)) {
+    query.find({ lastName: RegexOptions(lastName) });
+  }
+
+  if (valueRequired(phoneNumber)) {
+    query.find({ phoneNumber: RegexOptions(phoneNumber) });
+  }
+
+  if (valueRequired(email)) {
+    query.find({ email: RegexOptions(email) });
+  }
 
   if (valueRequired(createUser)) {
     const userData = await useSearch(createUser);
@@ -124,34 +242,24 @@ exports.getNews = asyncHandler(async (req, res, next) => {
     }
   }
 
-  if (valueRequired(categories)) {
-    const splitData = categories.split(",");
-    if (splitData.length > 1) {
-      query.where("categories").in(splitData);
-    } else {
-      query.where("categories").in(categories);
-    }
-  }
-  if (valueRequired(status)) query.where("status").equals(status);
-
-  query.populate("categories");
-  query.select(select);
+  query.populate("service");
   query.populate("createUser");
   query.populate("updateUser");
+  query.select(select);
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
   const result = await clonedQuery.count();
 
-  const pagination = await paginate(page, limit, News, result);
+  const pagination = await paginate(page, limit, Booking, result);
   query.limit(limit);
   query.skip(pagination.start - 1);
-  const news = await query.exec();
+  const booking = await query.exec();
 
   res.status(200).json({
     success: true,
-    count: news.length,
-    data: news,
+    count: booking.length,
+    data: booking,
     pagination,
   });
 });
@@ -159,17 +267,25 @@ exports.getNews = asyncHandler(async (req, res, next) => {
 const getFullData = async (req, page) => {
   const limit = 25;
   const select = req.query.select;
+  let sort = req.query.sort || { createAt: -1 };
 
-  // NEWS FIELDS
+  // DATA FIELDS
   const status = req.query.status;
-  const star = req.query.star;
-  const name = req.query.name;
-  const type = req.query.type;
-  const categories = req.query.categories;
+  const paid = req.query.paid;
+  const bookingNumber = req.query.bookingNumber;
+  const paidType = req.query.paidType;
+  const service = req.query.serivce;
+  const date = req.query.date;
+  const time = req.query.time;
+  const bookingMsg = req.query.bookingMsg;
+  const firstName = req.query.firstName;
+  const lastName = req.query.lastName;
+  const phoneNumber = req.query.phoneNumber;
+  const email = req.query.email;
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
-  let sort = req.query.sort || { createAt: -1 };
-  const query = News.find();
+
+  const query = Booking.find();
 
   if (valueRequired(status)) {
     if (status.split(",").length > 1) {
@@ -177,8 +293,53 @@ const getFullData = async (req, page) => {
     } else query.where("status").equals(status);
   }
 
-  if (valueRequired(name))
-    query.find({ name: { $regex: ".*" + name + ".*", $options: "i" } });
+  if (valueRequired(paid)) {
+    const splitData = paid.split(",");
+    if (splitData.length > 1) {
+      query.where("paid").in(paid.split(","));
+    } else query.where("paid").equals(paid);
+  }
+
+  if (valueRequired(paidType)) {
+    query.find({ paidType });
+  }
+
+  if (valueRequired(bookingNumber)) {
+    query.find({ bookingNumber: RegexOptions(bookingNumber) });
+  }
+
+  if (valueRequired(service)) {
+    const serviceIds = useServiceSearch(service);
+    query.find({}).where("service").in(serviceIds);
+  }
+
+  if (valueRequired(date)) {
+    query.find({ date });
+  }
+
+  if (valueRequired(time)) {
+    query.find({ time });
+  }
+
+  if (valueRequired(bookingMsg)) {
+    query.find({ bookingMsg: RegexOptions(bookingMsg) });
+  }
+
+  if (valueRequired(firstName)) {
+    query.find({ firstName: RegexOptions(firstName) });
+  }
+
+  if (valueRequired(lastName)) {
+    query.find({ lastName: RegexOptions(lastName) });
+  }
+
+  if (valueRequired(phoneNumber)) {
+    query.find({ phoneNumber: RegexOptions(phoneNumber) });
+  }
+
+  if (valueRequired(email)) {
+    query.find({ email: RegexOptions(email) });
+  }
 
   if (valueRequired(createUser)) {
     const userData = await useSearch(createUser);
@@ -197,35 +358,32 @@ const getFullData = async (req, page) => {
   if (valueRequired(sort)) {
     if (typeof sort === "string") {
       const spliteSort = sort.split(":");
-      let convertSort = {};
-      if (spliteSort[1] === "ascend") {
-        convertSort = { [spliteSort[0]]: 1 };
-      } else {
-        convertSort = { [spliteSort[0]]: -1 };
+      if (spliteSort.length > 0) {
+        let convertSort = {};
+        if (spliteSort[1] === "ascend") {
+          convertSort = { [spliteSort[0]]: 1 };
+        } else {
+          convertSort = { [spliteSort[0]]: -1 };
+        }
+        if (spliteSort[0] != "undefined") query.sort(convertSort);
       }
-      if (spliteSort[0] != "undefined") query.sort(convertSort);
+
+      const splite = sort.split("_");
+      if (splite.length > 0) {
+        let convertSort = {};
+        if (splite[1] === "ascend") {
+          convertSort = { [splite[0]]: 1 };
+        } else {
+          convertSort = { [splite[0]]: -1 };
+        }
+        if (splite[0] != "undefined") query.sort(convertSort);
+      }
+    } else {
+      query.sort(sort);
     }
   }
 
-  if (valueRequired(star)) {
-    if (star.split(",").length > 1) {
-      query.where("star").in(star.split(","));
-    } else query.where("star").equals(star);
-  }
-
-  if (valueRequired(type)) {
-    query.find({ type: { $regex: ".*" + type + ".*", $options: "i" } });
-  }
-
-  if (valueRequired(categories)) {
-    const catIds = await newsCategorySearch(categories);
-    console.log(catIds);
-    if (catIds.length > 0) {
-      query.where("categories").in(catIds);
-    }
-  }
-
-  query.populate({ path: "categories", select: "name -_id" });
+  query.populate({ path: "service", select: "name -_id" });
   query.select(select);
   query.populate({ path: "createUser", select: "firstName -_id" });
   query.populate({ path: "updateUser", select: "firstName -_id" });
@@ -234,12 +392,12 @@ const getFullData = async (req, page) => {
   const clonedQuery = new qc();
   const result = await clonedQuery.count();
 
-  const pagination = await paginate(page, limit, News, result);
+  const pagination = await paginate(page, limit, Booking, result);
   query.limit(limit);
   query.skip(pagination.start - 1);
-  const news = await query.exec();
+  const booking = await query.exec();
 
-  return news;
+  return booking;
 };
 
 exports.excelData = asyncHandler(async (req, res) => {
@@ -248,17 +406,23 @@ exports.excelData = asyncHandler(async (req, res) => {
   let sort = req.query.sort || { createAt: -1 };
   const select = req.query.select;
 
-  // NEWS FIELDS
+  // DATA FIELDS
   const status = req.query.status;
-  const star = req.query.star;
-  const name = req.query.name;
-  const type = req.query.type;
-  const categories = req.query.categories;
-  const category = req.query.category;
+  const paid = req.query.paid;
+  const bookingNumber = req.query.bookingNumber;
+  const paidType = req.query.paidType;
+  const service = req.query.serivce;
+  const date = req.query.date;
+  const time = req.query.time;
+  const bookingMsg = req.query.bookingMsg;
+  const firstName = req.query.firstName;
+  const lastName = req.query.lastName;
+  const phoneNumber = req.query.phoneNumber;
+  const email = req.query.email;
   const createUser = req.query.createUser;
   const updateUser = req.query.updateUser;
 
-  const query = News.find();
+  const query = Booking.find();
 
   if (valueRequired(status)) {
     if (status.split(",").length > 1) {
@@ -266,27 +430,53 @@ exports.excelData = asyncHandler(async (req, res) => {
     } else query.where("status").equals(status);
   }
 
-  if (valueRequired(star)) {
-    const splitData = star.split(",");
+  if (valueRequired(paid)) {
+    const splitData = paid.split(",");
     if (splitData.length > 1) {
-      query.where("star").in(star.split(","));
-    } else query.where("star").equals(star);
+      query.where("paid").in(paid.split(","));
+    } else query.where("paid").equals(paid);
   }
 
-  if (valueRequired(type)) {
-    query.find({ type: { $regex: ".*" + type + ".*", $options: "i" } });
+  if (valueRequired(paidType)) {
+    query.find({ paidType });
   }
 
-  if (valueRequired(category)) {
-    const catIds = await newsCategorySearch(category);
-    console.log(catIds);
-    if (catIds.length > 0) {
-      query.where("categories").in(catIds);
-    }
+  if (valueRequired(bookingNumber)) {
+    query.find({ bookingNumber: RegexOptions(bookingNumber) });
   }
 
-  if (valueRequired(name))
-    query.find({ name: { $regex: ".*" + name + ".*", $options: "i" } });
+  if (valueRequired(service)) {
+    const serviceIds = useServiceSearch(service);
+    query.find({}).where("service").in(serviceIds);
+  }
+
+  if (valueRequired(date)) {
+    query.find({ date });
+  }
+
+  if (valueRequired(time)) {
+    query.find({ time });
+  }
+
+  if (valueRequired(bookingMsg)) {
+    query.find({ bookingMsg: RegexOptions(bookingMsg) });
+  }
+
+  if (valueRequired(firstName)) {
+    query.find({ firstName: RegexOptions(firstName) });
+  }
+
+  if (valueRequired(lastName)) {
+    query.find({ lastName: RegexOptions(lastName) });
+  }
+
+  if (valueRequired(phoneNumber)) {
+    query.find({ phoneNumber: RegexOptions(phoneNumber) });
+  }
+
+  if (valueRequired(email)) {
+    query.find({ email: RegexOptions(email) });
+  }
 
   if (valueRequired(createUser)) {
     const userData = await useSearch(createUser);
@@ -330,25 +520,15 @@ exports.excelData = asyncHandler(async (req, res) => {
     }
   }
 
-  if (valueRequired(categories)) {
-    const splitData = categories.split(",");
-    if (splitData.length > 1) {
-      query.where("categories").in(splitData);
-    } else {
-      query.where("categories").in(categories);
-    }
-  }
-  if (valueRequired(status)) query.where("status").equals(status);
-
-  query.populate("categories");
   query.select(select);
+  query.populate("service");
   query.populate("createUser");
   query.populate("updateUser");
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
   const result = await clonedQuery.count();
-  const pagination = await paginate(page, limit, News, result);
+  const pagination = await paginate(page, limit, Booking, result);
   const pageCount = pagination.pageCount;
   let datas = [];
 
@@ -363,174 +543,91 @@ exports.excelData = asyncHandler(async (req, res) => {
   });
 });
 
-exports.multDeleteNews = asyncHandler(async (req, res, next) => {
+exports.multDeleteBooking = asyncHandler(async (req, res, next) => {
   const ids = req.queryPolluted.id;
-  const findNews = await News.find({ _id: { $in: ids } });
+  const findBookings = await Booking.find({ _id: { $in: ids } });
 
-  if (findNews.length <= 0) {
+  if (findBookings.length <= 0) {
     throw new MyError("Таны сонгосон мэдээнүүд олдсонгүй", 400);
   }
-  findNews.map(async (el) => {
-    el.pictures && (await imageDelete(el.pictures));
-  });
 
-  await News.deleteMany({ _id: { $in: ids } });
+  await Booking.deleteMany({ _id: { $in: ids } });
 
   res.status(200).json({
     success: true,
   });
 });
 
-exports.getSingleNews = asyncHandler(async (req, res, next) => {
-  const news = await News.findByIdAndUpdate(req.params.id).populate(
-    "categories"
-  );
+exports.getBooking = asyncHandler(async (req, res, next) => {
+  const booking = await Booking.findByIdAndUpdate(req.params.id)
+    .populate("service")
+    .populate("createUser")
+    .populate("updateUser");
 
-  news.views = news.views + 1;
-  news.save();
-
-  if (!news) {
-    throw new MyError("Тухайн мэдээ олдсонгүй. ", 404);
+  if (!booking) {
+    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
   res.status(200).json({
     success: true,
-    data: news,
+    data: booking,
   });
 });
 
-exports.updateNews = asyncHandler(async (req, res, next) => {
-  let news = await News.findById(req.params.id);
+exports.updateBooking = asyncHandler(async (req, res, next) => {
+  let booking = await Booking.findById(req.params.id);
 
-  if (!news) {
-    throw new MyError("Тухайн мэдээ олдсонгүй. ", 404);
+  if (!booking) {
+    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  const name = req.body.name;
-  const nameUnique = await News.find({}).where("name").equals(name);
+  const currentDate = new Date().toJSON().slice(0, 10);
 
-  if (nameUnique.length > 1) {
-    req.body.slug =
-      nameUnique[nameUnique.length - 1].slug + (nameUnique + 1).toString();
-  } else {
-    req.body.slug = slugify(name);
+  if (req.body.date < currentDate) {
+    throw new MyError("Тухайн цаг дээр захиалга авах боломжгүй.");
   }
 
-  if (valueRequired(req.body.pictures) === false) {
-    req.body.pictures = [];
-  }
+  const sameDate = await Booking.find({})
+    .where("status")
+    .equals(true)
+    .where("date")
+    .equals(req.body.date)
+    .where("time")
+    .equals(req.body.time);
 
-  if (valueRequired(req.body.audios) === false) {
-    req.body.audios = [];
-  }
-
-  if (valueRequired(req.body.videos) === false) {
-    req.body.videos = [];
-  }
-
-  if (valueRequired(req.body.categories) === false) {
-    req.body.categories = [];
+  if (sameDate.length > 0) {
+    let isSame = true;
+    if (sameDate.length === 1) {
+      if (
+        sameDate[0].firstName === req.body.firstName ||
+        sameDate[0].phoneNumber === req.body.phoneNumber
+      ) {
+        isSame = false;
+      }
+    }
+    if (isSame === true) {
+      throw new MyError("Тухайн цаг дээр захиалга үүссэн байна.");
+    }
   }
 
   req.body.updateUser = req.userId;
   req.body.updateAt = Date.now();
 
-  news = await News.findByIdAndUpdate(req.params.id, req.body, {
+  booking = await Booking.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
 
   res.status(200).json({
     success: true,
-    data: news,
+    data: booking,
   });
 });
 
-exports.getCountNews = asyncHandler(async (req, res, next) => {
-  const news = await News.count();
+exports.getCountBooking = asyncHandler(async (req, res, next) => {
+  const booking = await Booking.count();
   res.status(200).json({
     success: true,
-    data: news,
-  });
-});
-
-exports.getAllNews = asyncHandler(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 25;
-  const name = req.query.name;
-  const select = req.query.select;
-
-  let sort = req.query.sort || { createAt: -1 };
-  let category = req.query.category;
-  let status = req.query.status || null;
-
-  if (typeof sort === "string") {
-    sort = JSON.parse("{" + req.query.sort + "}");
-  }
-
-  if (category === "*") {
-    category = null;
-  }
-  if (!valueRequired(status)) {
-    status = null;
-  }
-
-  ["select", "sort", "page", "limit", "category", "status", "name"].forEach(
-    (el) => delete req.query[el]
-  );
-
-  const query = News.find({});
-
-  if (valueRequired(name))
-    query.find({ name: { $regex: ".*" + name + ".*", $options: "i" } });
-
-  query.populate("categories");
-  query.populate("createUser");
-  query.populate("updateUser");
-  query.select(select);
-  query.sort(sort);
-
-  if (category !== null) {
-    query.where("categories").in(category);
-  }
-  if (valueRequired(status)) {
-    if (status.split(",").length > 1) {
-      query.where("status").in(status.split(","));
-    } else query.where("status").equals(status);
-  }
-
-  const qc = query.toConstructor();
-  const clonedQuery = new qc();
-  const result = await clonedQuery.count();
-
-  const pagination = await paginate(page, limit, null, result);
-  query.skip(pagination.start - 1);
-  query.limit(limit);
-
-  const news = await query.exec();
-
-  res.status(200).json({
-    success: true,
-    count: news.length,
-    data: news,
-    pagination,
-  });
-});
-
-exports.getSlugNews = asyncHandler(async (req, res, next) => {
-  const news = await News.findOne({ slug: req.params.slug }).populate(
-    "createUser"
-  );
-
-  if (!news) {
-    throw new MyError("Тухайн мэдээ олдсонгүй. ", 404);
-  }
-
-  news.views = news.views + 1;
-  news.update();
-
-  res.status(200).json({
-    success: true,
-    data: news,
+    data: booking,
   });
 });
