@@ -4,7 +4,10 @@ const InvoiceSchema = new mongoose.Schema({
   isPaid: {
     type: Boolean,
     enum: [true, false],
-    default: true,
+    default: false,
+  },
+  invoice_id: {
+    type: String,
   },
   sender_invoice_no: {
     type: String,
@@ -16,14 +19,17 @@ const InvoiceSchema = new mongoose.Schema({
     enum: ["product", "course", "booking"],
   },
   invoice_receiver_code: {
-    type: Number,
-    required: [true, "Худалдан авагчийн id оруулна уу"],
+    type: String,
   },
   invoice_description: {
     type: String,
   },
   amount: {
     type: Number,
+  },
+  createAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 

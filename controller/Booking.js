@@ -30,7 +30,7 @@ exports.createBooking = asyncHandler(async (req, res, next) => {
 
     const time = new Date();
     const timeNow = parseInt(
-      time.toLocaleString("en-US", { hour: "numeric", hour12: true })
+      time.toLocaleString("en-US", { hour: "numeric", hour12: false })
     );
 
     if (req.body.date === currentDate && parseInt(req.body.time) <= timeNow) {
@@ -91,7 +91,7 @@ exports.checkBooking = asyncHandler(async (req, res, next) => {
     }
     const time = new Date();
     const timeNow = parseInt(
-      time.toLocaleString("en-US", { hour: "numeric", hour12: true })
+      time.toLocaleString("en-US", { hour: "numeric", hour12: false })
     );
 
     if (req.body.date === currentDate && parseInt(req.body.time) <= timeNow) {
