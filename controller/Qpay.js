@@ -2,6 +2,8 @@ const Qpay = require("../models/Qpay");
 const asyncHandler = require("express-async-handler");
 const axios = require("axios");
 const Invoice = require("../models/Invoice");
+const MyError = require("../utils/myError");
+const Booking = require("../models/Booking");
 
 const getQpayAccess = () => {
   let data = "";
@@ -65,6 +67,11 @@ exports.createInvoice = asyncHandler(async (req, res) => {
 
   const accessToken = await Qpay.findOne({}).sort({ createAt: -1 });
 
+  if (!accessToken) {
+    getQpayAccess();
+    throw new MyError("Дахин оролдоно уу");
+  }
+
   let config = {
     method: "POST",
     maxBodyLength: Infinity,
@@ -101,5 +108,56 @@ exports.createInvoice = asyncHandler(async (req, res) => {
 });
 
 exports.getCallBackPayment = asyncHandler(async (req, res) => {
-  console.log(req.query.invoice);
+  const invoice = req.query.invoice;
+  const result = await Invoice.findOne({ sender_invoice_no: invoice });
+
+  let config = {
+    method: "POST",
+    maxBodyLength: Infinity,
+    url: "https://merchant.qpay.mn/v2/payment/check",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken.access_token}`,
+    },
+    body: JSON.stringify({
+      object_type: "INVOICE",
+      object_id: result.invoice_id,
+      offset: {
+        page_number: 1,
+        page_limit: 100,
+      },
+    }),
+  };
+
+  const response = await axios.request(config);
+
+  if (!response) {
+    throw new MyError("Төлбөр төлөгдөөгүй байна.");
+  }
+
+  if (response.payment_status !== "PAID") {
+    throw new MyError("Төлбөр төлөгдөөгүй байна.");
+  }
+
+  if (!result) {
+    throw new MyError("Төлбөр төлөгдөөгүй байна.");
+  }
+
+
+    result.isPaid = true;
+    result.save();
+
+    const type = result.sender_branch_code;
+
+    if (type === "booking") {
+      const id = parseInt(invoice);
+      const booking = await Booking.findOne({ bookingNumber: id });
+      if (booking) {
+        (booking.paidType = "qpay"), (booking.paidAdvance = result.amount);
+        (booking.status = true), booking.save();
+      }
+    }
+    
+    
+
 });

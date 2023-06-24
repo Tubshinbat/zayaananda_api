@@ -11,6 +11,7 @@ const BookingSchema = new mongoose.Schema({
   bookingNumber: {
     type: Number,
     trim: true,
+    unique: true,
   },
 
   paid: {
