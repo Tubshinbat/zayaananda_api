@@ -4,6 +4,9 @@ const axios = require("axios");
 const Invoice = require("../models/Invoice");
 const MyError = require("../utils/myError");
 const Booking = require("../models/Booking");
+const User = require("../models/User");
+const Order = require("../models/Order");
+const { valueRequired } = require("../lib/check");
 
 const getQpayAccess = () => {
   let data = "";
@@ -35,18 +38,12 @@ const getQpayAccess = () => {
 };
 
 exports.getQpayToken = asyncHandler(async (req, res) => {
+  const currentDate = new Date().toJSON().slice(0, 10);
   const lastQpayData = await Qpay.findOne({}).sort({ createAt: -1 });
   if (!lastQpayData) {
     getQpayAccess();
-  } else if (lastQpayData.createAt) {
-    const initialDate = new Date(lastQpayData.createAt);
-    const expiryDate = new Date(
-      initialDate.valueOf() + lastQpayData.expires_in
-    );
-
-    if (expiryDate.getTime() < new Date().getTime()) {
-      getQpayAccess();
-    }
+  } else if (lastQpayData.createAt.toJSON().slice(0, 10) < currentDate) {
+    getQpayAccess();
   }
 
   res.status(200).json({
@@ -55,6 +52,23 @@ exports.getQpayToken = asyncHandler(async (req, res) => {
 });
 
 exports.createInvoice = asyncHandler(async (req, res) => {
+  let sender_invoice_no = req.body.sender_invoice_no;
+
+  if (valueRequired(req.body.sender_branch_code)) {
+    if (req.body.sender_branch_code === "course") {
+      sender_invoice_no = 1;
+      const lastInvoice = await Invoice.findOne({
+        sender_branch_code: "course",
+      }).sort({ createAt: -1 });
+
+      if (lastInvoice) {
+        sender_invoice_no =
+          parseInt(lastInvoice.sender_invoice_no.substring(1)) + 1;
+      }
+      req.body.sender_invoice_no = "C" + sender_invoice_no;
+    }
+  }
+
   let data = JSON.stringify({
     invoice_code: "TEST_INVOICE",
     sender_invoice_no: req.body.sender_invoice_no,
@@ -66,10 +80,15 @@ exports.createInvoice = asyncHandler(async (req, res) => {
   });
 
   const accessToken = await Qpay.findOne({}).sort({ createAt: -1 });
-
+  const currentDate = new Date().toJSON().slice(0, 10);
   if (!accessToken) {
     getQpayAccess();
     throw new MyError("Дахин оролдоно уу");
+  }
+
+  if (accessToken.createAt.toJSON().slice(0, 10) < currentDate) {
+    getQpayAccess();
+    this.createInvoice();
   }
 
   let config = {
@@ -86,14 +105,26 @@ exports.createInvoice = asyncHandler(async (req, res) => {
   const response = await axios.request(config);
 
   if (response) {
-    const invoice = await Invoice.create({
+    let course = null;
+    if (valueRequired(req.body.course)) {
+      course = req.body.course;
+    }
+
+    let invoiceData = {
       invoice_id: response.data.invoice_id,
       sender_invoice_no: req.body.sender_invoice_no,
       invoice_receiver_code: "terminal",
       invoice_description: req.body.invoice_description,
       sender_branch_code: req.body.sender_branch_code,
       amount: req.body.amount,
-    });
+    };
+
+    if (req.body.sender_branch_code == "course") {
+      invoiceData.course = req.body.course;
+      invoiceData.userId = req.body.userId;
+    }
+
+    const invoice = await Invoice.create(invoiceData);
 
     res.status(200).json({
       success: true,
@@ -110,6 +141,15 @@ exports.createInvoice = asyncHandler(async (req, res) => {
 exports.getCallBackPayment = asyncHandler(async (req, res) => {
   const invoice = req.query.invoice;
   const result = await Invoice.findOne({ sender_invoice_no: invoice });
+  const accessToken = await Qpay.findOne({}).sort({ createAt: -1 });
+
+  if (!accessToken) {
+    getQpayAccess();
+  }
+
+  if (!result) {
+    throw new MyError("Нэхэмжлэл үүсээгүй байна", 404);
+  }
 
   let config = {
     method: "POST",
@@ -119,7 +159,7 @@ exports.getCallBackPayment = asyncHandler(async (req, res) => {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken.access_token}`,
     },
-    body: JSON.stringify({
+    data: JSON.stringify({
       object_type: "INVOICE",
       object_id: result.invoice_id,
       offset: {
@@ -135,29 +175,59 @@ exports.getCallBackPayment = asyncHandler(async (req, res) => {
     throw new MyError("Төлбөр төлөгдөөгүй байна.");
   }
 
-  if (response.payment_status !== "PAID") {
+  if (response.data.count == 0) {
     throw new MyError("Төлбөр төлөгдөөгүй байна.");
   }
 
-  if (!result) {
+  if (response.data.rows[0].payment_status !== "PAID") {
     throw new MyError("Төлбөр төлөгдөөгүй байна.");
   }
 
+  if (result.isPaid === true) {
+    throw new MyError("Төлбөр төлөгдсөн байна");
+  }
 
-    result.isPaid = true;
-    result.save();
+  result.isPaid = true;
+  result.save();
 
-    const type = result.sender_branch_code;
+  const type = result.sender_branch_code;
 
-    if (type === "booking") {
-      const id = parseInt(invoice);
-      const booking = await Booking.findOne({ bookingNumber: id });
-      if (booking) {
-        (booking.paidType = "qpay"), (booking.paidAdvance = result.amount);
-        (booking.status = true), booking.save();
-      }
+  if (type === "booking") {
+    const id = parseInt(invoice.substring(1));
+
+    const booking = await Booking.findOne({ bookingNumber: id });
+    if (booking) {
+      booking.paidType = "qpay";
+      booking.paidAdvance = result.amount;
+      booking.paid = true;
+      booking.status = true;
+      booking.save();
     }
-    
-    
+  }
 
+  if (type === "course") {
+    const user = await User.findById(result.userId);
+    if (user) {
+      user.courses.push(result.course);
+      user.save();
+    }
+  }
+
+  if (type === "product") {
+    const id = parseInt(invoice.substring(1));
+    const order = await Order.findOne({ orderNumber: id });
+    if (order) {
+      order.paid = true;
+      order.paidType = "qpay";
+      order.totalPrice = result.amount;
+      order.status = true;
+      order.save();
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+  });
 });
+
+exports.pamentCheck = asyncHandler(async (req, res) => {});

@@ -18,6 +18,17 @@ const InvoiceSchema = new mongoose.Schema({
     type: String,
     enum: ["product", "course", "booking"],
   },
+
+  course: {
+    type: mongoose.Schema.ObjectId,
+    ref: "InitCourse",
+  },
+
+  userId: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Users",
+  },
+
   invoice_receiver_code: {
     type: String,
   },
