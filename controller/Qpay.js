@@ -11,9 +11,9 @@ const { valueRequired } = require("../lib/check");
 const getQpayAccess = () => {
   let data = "";
 
-  var username = "TEST_MERCHANT ";
-  var password = "123456";
-  var auth = "Basic VEVTVF9NRVJDSEFOVDoxMjM0NTY=";
+  var username = "ZAYA_ANANDA";
+  var password = "BpQqHffC";
+  var auth = "Basic WkFZQV9BTkFOREE6QnBRcUhmZkM=";
 
   let config = {
     method: "post",
@@ -22,7 +22,7 @@ const getQpayAccess = () => {
     headers: {
       Authorization: auth,
       Cookie:
-        "_4d45d=http://10.233.105.162:3000; qpay_merchant_openapi.sid=s%3AQvJM5t0m27_mHdJnc5oZ7TJR1uTeHe_R.6Hhg%2BSPuag%2B3Qxpba%2BPg9qBT8gRBv8biZwrSugZn0dk",
+        "_4d45d=http://10.233.124.201:3000; qpay_merchant_openapi.sid=s%3AmUH56Dazld8FjQACS7Rf1lXhxo73A51I.nancckzXUKIhdVJd%2B2QB16C818FtUm6FH%2BYXjkq7m9I",
     },
     data: data,
   };
@@ -70,7 +70,7 @@ exports.createInvoice = asyncHandler(async (req, res) => {
   }
 
   let data = JSON.stringify({
-    invoice_code: "TEST_INVOICE",
+    invoice_code: "ZAYA_ANANDA_INVOICE",
     sender_invoice_no: req.body.sender_invoice_no,
     invoice_receiver_code: "terminal",
     invoice_description: req.body.invoice_description,
