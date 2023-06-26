@@ -1,4 +1,4 @@
-const Paytype = require("../models/PayType");
+const Paytype = require("../models/payType");
 
 const User = require("../models/User");
 const MyError = require("../utils/myError");
