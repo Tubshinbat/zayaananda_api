@@ -17,4 +17,4 @@ const PayTypeSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Paytype", PayTypeSchema);
+module.exports = mongoose.model("PayType", PayTypeSchema);
