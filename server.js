@@ -38,6 +38,7 @@ const employeeRouters = require("./routes/Employee");
 const paytypeRouters = require("./routes/Paytype");
 const productRouters = require("./routes/Product");
 const qpayRouters = require("./routes/Qpay");
+const orderRouters = require("./routes/Order");
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
 
@@ -52,20 +53,16 @@ connectDB();
 var whitelist = [
   "http://localhost:3000",
   "http://localhost:3001",
-  "http://192.168.1.5",
-  "http://192.168.1.5:3000",
-  "http://192.168.10.103:3000",
-  "http://192.168.10.103:3001",
 
-  "https://barilga.lvg.mn",
-  "https://www.barilga.lvg.mn",
-  "https://admin-barilga.lvg.mn",
-  "https://www.admin-barilga.lvg.mn",
+  "http://zaya-ananda.com",
+  "http://www.zaya-ananda.com",
+  "http://admin-zaya-ananda.com",
+  "http://www.admin-zaya-ananda.com",
 
-  "https://barilga.gov.mn",
-  "https://www.barilga.gov.mn",
-  "https://admin-barilga.gov.mn",
-  "https://www.admin-barilga.gov.mn",
+  "https://zaya-ananda.com",
+  "https://www.zaya-ananda.com",
+  "https://admin-zaya-ananda.com",
+  "https://www.admin-zaya-ananda.com",
 ];
 
 // Өөр домэйн дээр байрлах клиент вэб аппуудаас шаардах шаардлагуудыг энд тодорхойлно
@@ -138,6 +135,7 @@ app.use("/api/v1/adsbanners", adsBannerRouters);
 app.use("/api/v1/menus", menuRouters);
 app.use("/api/v1/footermenus", footerRouters);
 app.use("/api/v1/payment", qpayRouters);
+app.use("/api/v1/orders", orderRouters);
 app.use("/api/v1/pages", pageRouters);
 app.use("/api/v1/file", fileRouters);
 app.use("/api/v1/products", productRouters);

@@ -25,7 +25,7 @@ router
 
 router
   .route("/:id")
-  .get(protect, authorize("admin", "operator"), getProduct)
+  .get(getProduct)
   .put(protect, authorize("admin", "operator"), updateProduct);
 
 router

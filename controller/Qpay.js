@@ -88,7 +88,7 @@ exports.createInvoice = asyncHandler(async (req, res) => {
 
   if (accessToken.createAt.toJSON().slice(0, 10) < currentDate) {
     getQpayAccess();
-    this.createInvoice();
+    this.createInvoice(req);
   }
 
   let config = {

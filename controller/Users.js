@@ -816,7 +816,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   // await user.save();
   await user.save({ validateBeforeSave: false });
 
-  const message = `Сайн байна уу? Энэ таны баталгаажуулах код <br> <br> ${resetToken}<br> <br> өдрийг сайхан өнгөрүүлээрэй!`;
+  const message = `Энэ таны баталгаажуулах код ${resetToken}`;
 
   // Имэйл илгээнэ
   // const info = await sendEmail({
@@ -825,10 +825,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   //   message,
   // });
 
-  console.log(resetToken);
-
   await fetch(
-    `http://web2sms.skytel.mn/apiSend?token=8fdfbfdd433e4973d3fb5cce159c275ab66523b6&sendto=${req.body.phoneNumber}&message=${message}`
+    `https://api.messagepro.mn/send?from=72779955&to=${user.phoneNumber}&text=${message}&key=346de67656a4fa0be6136047a9d91d16`
   );
 
   res.status(200).json({
