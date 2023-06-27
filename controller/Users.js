@@ -261,10 +261,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (user.role === "user") {
-    throw new MyError("Уучлаарай нэвтрэх боломжгүй.");
-  }
-
+ 
   if (user.status === false) {
     throw new MyError("Уучлаарай таны эрхийг хаасан байна.");
   }
