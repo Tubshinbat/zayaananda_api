@@ -117,10 +117,6 @@ exports.getOrders = asyncHandler(async (req, res) => {
     query.find({ phoneNumber: RegexOptions(phoneNumber) });
   }
 
-  if (valueRequired(email)) {
-    query.find({ email: RegexOptions(email) });
-  }
-
   if (valueRequired(userId)) {
     const userIds = await userSearch(userId);
     if (userIds.length > 0) {
@@ -129,21 +125,6 @@ exports.getOrders = asyncHandler(async (req, res) => {
       query.find({}).where("userId").in(userId);
     }
   }
-
-  if (valueRequired(createUser)) {
-    const userData = await useSearch(createUser);
-    if (userData) {
-      query.where("createUser").in(userData);
-    }
-  }
-
-  if (valueRequired(updateUser)) {
-    const userData = await useSearch(updateUser);
-    if (userData) {
-      query.where("updateUser").in(userData);
-    }
-  }
-  query.sort(sort);
 
   if (valueRequired(sort)) {
     if (typeof sort === "string") {
@@ -421,9 +402,6 @@ exports.getOrder = asyncHandler(async (req, res, next) => {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
 
-  order.views = order.views + 1;
-  order.save();
-
   res.status(200).json({
     success: true,
     data: order,
@@ -435,12 +413,8 @@ exports.deleteOrder = asyncHandler(async (req, res) => {
   const deleteOrder = await Order.findByIdAndDelete(id);
 
   if (!deleteOrder) {
-    throw new MyError("Тухайн мэдээлэл олдсонгүй. ", 404);
+    throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
   }
-
-  deleteOrder.pictures.map(async (el) => {
-    el.pictures && el.pictures.length > 0 && (await imageDelete(el.pictures));
-  });
 
   res.status(200).json({
     success: true,
@@ -453,7 +427,7 @@ exports.multDeleteOrder = asyncHandler(async (req, res, next) => {
   const findOrders = await Order.find({ _id: { $in: ids } });
 
   if (findOrders.length <= 0) {
-    throw new MyError("Таны сонгосон сургалтууд олдсонгүй", 400);
+    throw new MyError("Таны сонгосон өгөгдөлүүд олдсонгүй", 400);
   }
 
   findOrders.map((el) => {

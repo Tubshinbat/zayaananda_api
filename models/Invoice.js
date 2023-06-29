@@ -9,6 +9,7 @@ const InvoiceSchema = new mongoose.Schema({
   invoice_id: {
     type: String,
   },
+
   sender_invoice_no: {
     type: String,
     trim: true,
@@ -32,12 +33,15 @@ const InvoiceSchema = new mongoose.Schema({
   invoice_receiver_code: {
     type: String,
   },
+
   invoice_description: {
     type: String,
   },
+
   amount: {
     type: Number,
   },
+
   createAt: {
     type: Date,
     default: Date.now,
