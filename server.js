@@ -58,13 +58,13 @@ var whitelist = [
 
   "http://zaya-ananda.com",
   "http://www.zaya-ananda.com",
-  "http://admin-zaya-ananda.com",
-  "http://www.admin-zaya-ananda.com",
+  "http://admin.zaya-ananda.com",
+  "http://www.admin.zaya-ananda.com",
 
   "https://zaya-ananda.com",
   "https://www.zaya-ananda.com",
-  "https://admin-zaya-ananda.com",
-  "https://www.admin-zaya-ananda.com",
+  "https://admin.zaya-ananda.com",
+  "https://www.admin.zaya-ananda.com",
 ];
 
 // Өөр домэйн дээр байрлах клиент вэб аппуудаас шаардах шаардлагуудыг энд тодорхойлно
