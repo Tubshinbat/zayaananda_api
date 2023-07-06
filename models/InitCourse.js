@@ -60,6 +60,15 @@ const InitCourseSchema = new mongoose.Schema(
       type: [String],
     },
 
+    startDate: {
+      type: String,
+      default: null,
+    },
+
+    classCount: {
+      type: Number,
+    },
+
     views: {
       type: Number,
       default: 0,

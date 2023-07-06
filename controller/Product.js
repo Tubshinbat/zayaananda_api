@@ -3,15 +3,16 @@ const MyError = require("../utils/myError");
 const asyncHandler = require("express-async-handler");
 const paginate = require("../utils/paginate");
 const User = require("../models/User");
-const {  imageDelete } = require("../lib/photoUpload");
+const { imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
 
 exports.createProduct = asyncHandler(async (req, res) => {
   req.body.createUser = req.userId;
   req.body.status = (valueRequired(req.body.status) && req.body.status) || true;
-  req.body.discount = valueRequired(req.body.discount) === true && parseInt(req.body.discount) || 0;
-
-
+  req.body.discount =
+    (valueRequired(req.body.discount) === true &&
+      parseInt(req.body.discount)) ||
+    0;
 
   const product = await Product.create(req.body);
   res.status(200).json({
@@ -20,6 +21,27 @@ exports.createProduct = asyncHandler(async (req, res) => {
   });
 });
 
+function getRandomArbitrary(min, max) {
+  return Math.ceil(Math.random() * (max - min) + min);
+}
+
+exports.getRandomProducts = asyncHandler(async (req, res) => {
+  const limitrecords = 6;
+  Product.count().exec(function (err, count) {
+    // Get a random entry
+
+    let skipRecords = getRandomArbitrary(1, count - limitrecords);
+    // Again query all users but only fetch one offset by our random #
+    Product.find()
+      .skip(skipRecords)
+      .exec(function (err, result) {
+        res.status(200).json({
+          success: true,
+          data: result,
+        });
+      });
+  });
+});
 
 exports.getProducts = asyncHandler(async (req, res) => {
   // Эхлээд query - уудаа аваад хоосон үгүйг шалгаад утга олгох
@@ -113,7 +135,6 @@ const getFullData = async (req, page) => {
     } else query.where("status").equals(status);
   }
 
-
   if (valueRequired(name))
     query.find({ name: { $regex: ".*" + name + ".*", $options: "i" } });
 
@@ -179,7 +200,6 @@ exports.excelData = asyncHandler(async (req, res) => {
       query.where("status").in(status.split(","));
     } else query.where("status").equals(status);
   }
-
 
   if (valueRequired(name))
     query.find({ name: { $regex: ".*" + name + ".*", $options: "i" } });

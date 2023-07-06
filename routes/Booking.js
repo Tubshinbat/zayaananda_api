@@ -11,12 +11,15 @@ const {
   excelData,
   updateBooking,
   checkBooking,
+  getUserBookings,
 } = require("../controller/Booking");
 
 router
   .route("/")
   .post(createBooking)
   .get(protect, authorize("admin", "operator"), getBookings);
+
+router.route("/user").get(protect, getUserBookings);
 
 router.post("/checkbooking", checkBooking);
 

@@ -10,6 +10,7 @@ const {
   getProduct,
   getCountProduct,
   updateProduct,
+  getRandomProducts,
 } = require("../controller/Product");
 
 router
@@ -17,6 +18,7 @@ router
   .post(protect, authorize("admin", "operator"), createProduct)
   .get(getProducts);
 
+router.route("/random").get(getRandomProducts);
 router.route("/excel").get(protect, authorize("admin", "operator"), excelData);
 
 router

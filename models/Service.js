@@ -8,12 +8,6 @@ const ServiceSchema = new mongoose.Schema({
     default: false,
   },
 
-  direct: {
-    type: String,
-    enum: [true, false],
-    trim: false,
-  },
-
   slug: String,
 
   name: {
@@ -39,10 +33,6 @@ const ServiceSchema = new mongoose.Schema({
   views: {
     type: Number,
     default: 0,
-  },
-
-  link: {
-    type: String,
   },
 
   createAt: {

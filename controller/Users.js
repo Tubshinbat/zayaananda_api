@@ -261,7 +261,6 @@ exports.login = asyncHandler(async (req, res, next) => {
     );
   }
 
- 
   if (user.status === false) {
     throw new MyError("Уучлаарай таны эрхийг хаасан байна.");
   }
@@ -335,7 +334,7 @@ exports.getUseInfo = asyncHandler(async (req, res, next) => {
     );
   }
 
-  const user = await User.findById(req.userId);
+  const user = await User.findById(req.userId).populate("courses");
 
   if (user.status === false)
     throw new MyError("Уучлаарай таны эрхийг хаасан байна..", 400);
@@ -424,7 +423,7 @@ exports.tokenCheckAlways = asyncHandler(async (req, res, next) => {
   req.userId = tokenObject.id;
   req.userRole = tokenObject.role;
 
-  const user = await User.findById(tokenObject.id);
+  const user = await User.findById(tokenObject.id).populate("courses");
 
   res.status(200).json({
     success: true,
@@ -620,6 +619,7 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
   query.sort(sort);
   query.populate("createUser");
   query.populate("updateUser");
+  query.populate("courses");
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
@@ -640,7 +640,7 @@ exports.getUsers = asyncHandler(async (req, res, next) => {
 });
 
 exports.getUser = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
+  const user = await User.findById(req.params.id).populate("courses");
   if (!user) {
     throw new MyError("Тухайн хэрэглэгч олдсонгүй.", 404);
   }

@@ -20,7 +20,8 @@ const OrderSchema = new mongoose.Schema({
 
   paidType: {
     type: String,
-    enum: ["qpay", "bankaccount"],
+    enum: ["qpay", "bankaccount", "none"],
+    default: "none",
   },
 
   carts: [
@@ -69,6 +70,16 @@ const OrderSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Утасны дугаараа оруулна уу"],
     trim: true,
+  },
+
+  email: {
+    type: String,
+    unique: true,
+    trim: true,
+    match: [
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/,
+      "Имэйл хаягаа буруу оруулсан байна",
+    ],
   },
 
   userId: {

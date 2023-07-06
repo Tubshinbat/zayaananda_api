@@ -7,6 +7,7 @@ const { imageDelete } = require("../lib/photoUpload");
 const { valueRequired } = require("../lib/check");
 const { RegexOptions, userSearch } = require("../lib/searchOfterModel");
 const Product = require("../models/Product");
+const Invoice = require("../models/Invoice");
 
 exports.createOrder = asyncHandler(async (req, res) => {
   req.body.createUser = req.userId;
@@ -142,6 +143,43 @@ exports.getOrders = asyncHandler(async (req, res) => {
   query.populate("carts.productInfo");
   query.populate("createUser");
   query.populate("updateUser");
+
+  const qc = query.toConstructor();
+  const clonedQuery = new qc();
+  const result = await clonedQuery.count();
+
+  const pagination = await paginate(page, limit, null, result);
+  query.skip(pagination.start - 1);
+  query.limit(limit);
+
+  const order = await query.exec();
+
+  res.status(200).json({
+    success: true,
+    count: order.length,
+    data: order,
+    pagination,
+  });
+});
+
+exports.getUserOrders = asyncHandler(async (req, res) => {
+  // Эхлээд query - уудаа аваад хоосон үгүйг шалгаад утга олгох
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 25;
+
+  if (req.userId) {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      throw new MyError("Хандах боломжгүй байна", 404);
+    }
+  } else {
+    throw new MyError("Нэвтэрч орно уу", 400);
+  }
+
+  // FIELDS
+  const query = Order.find({ userId: req.userId }).sort({ createAt: -1 });
+
+  query.populate("carts.productInfo");
 
   const qc = query.toConstructor();
   const clonedQuery = new qc();
@@ -449,6 +487,15 @@ exports.updateOrder = asyncHandler(async (req, res) => {
 
   req.body.updateUser = req.userId;
   delete req.body.createUser;
+
+  if (req.body.paid) {
+    const sender_invoice_no = "P" + order.orderNumber;
+    console.log(sender_invoice_no);
+    const data = {
+      isPaid: req.body.paid,
+    };
+    await Invoice.findOneAndUpdate({ sender_invoice_no }, data);
+  }
 
   if (!order) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй", 404);

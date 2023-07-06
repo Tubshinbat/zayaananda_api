@@ -39,6 +39,7 @@ const paytypeRouters = require("./routes/Paytype");
 const productRouters = require("./routes/Product");
 const qpayRouters = require("./routes/Qpay");
 const orderRouters = require("./routes/Order");
+const invoiceRouters = require("./routes/Invoice");
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
 
@@ -52,6 +53,7 @@ connectDB();
 // Манай рест апиг дуудах эрхтэй сайтуудын жагсаалт :
 var whitelist = [
   "http://localhost:3000",
+  "http://localhost:8989",
   "http://localhost:3001",
 
   "http://zaya-ananda.com",
@@ -139,6 +141,7 @@ app.use("/api/v1/orders", orderRouters);
 app.use("/api/v1/pages", pageRouters);
 app.use("/api/v1/file", fileRouters);
 app.use("/api/v1/products", productRouters);
+app.use("/api/v1/invoices", invoiceRouters);
 app.use(errorHandler);
 // Алдаа үүсэхэд барьж авч алдааны мэдээллийг клиент тал руу автоматаар мэдээлнэ
 

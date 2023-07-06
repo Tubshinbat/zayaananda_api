@@ -27,13 +27,6 @@ exports.createBanner = asyncHandler(async (req, res, next) => {
   });
 });
 
-const useSearch = async (userFirstname) => {
-  const userData = await User.find({
-    firstName: { $regex: ".*" + userFirstname + ".*", $options: "i" },
-  }).select("_id");
-  return userData;
-};
-
 exports.getBanners = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 25;

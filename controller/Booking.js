@@ -264,6 +264,34 @@ exports.getBookings = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.getUserBookings = asyncHandler(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 25;
+  let sort = req.query.sort || { createAt: -1 };
+
+  const query = Booking.find();
+  query.where("status").equals(true);
+
+  query.populate("service");
+  query.populate("createUser");
+  query.populate("updateUser");
+
+  const qc = query.toConstructor();
+  const clonedQuery = new qc();
+  const result = await clonedQuery.count();
+
+  const pagination = await paginate(page, limit, Booking, result);
+  query.limit(limit);
+  query.skip(pagination.start - 1);
+  const booking = await query.exec();
+
+  res.status(200).json({
+    success: true,
+    count: booking.length,
+    data: booking,
+    pagination,
+  });
+});
 const getFullData = async (req, page) => {
   const limit = 25;
   const select = req.query.select;

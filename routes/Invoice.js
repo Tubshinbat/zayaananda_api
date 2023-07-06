@@ -6,11 +6,15 @@ const {
   getInvoices,
   multDeleteInvoice,
   updateInvoice,
+  getInvoice,
 } = require("../controller/Invoice");
 
-router.route("/").get(protect, getInvoices);
+router.route("/").get(protect, authorize("admin"), getInvoices);
 
 router.route("/delete").delete(protect, authorize("admin"), multDeleteInvoice);
-router.route("/:id").get(protect, getOrder).put(protect, updateInvoice);
+router
+  .route("/:id")
+  .get(protect, getInvoice)
+  .put(protect, authorize("admin"), updateInvoice);
 
 module.exports = router;

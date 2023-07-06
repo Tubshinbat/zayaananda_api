@@ -27,7 +27,7 @@ const InvoiceSchema = new mongoose.Schema({
 
   userId: {
     type: mongoose.Schema.ObjectId,
-    ref: "Users",
+    ref: "User",
   },
 
   invoice_receiver_code: {

@@ -8,42 +8,41 @@ const User = require("../models/User");
 const Order = require("../models/Order");
 const { valueRequired } = require("../lib/check");
 
-const getQpayAccess = () => {
-  let data = "";
+const getQpayAccess = async () => {
+  try {
+    let data = "";
 
-  var username = "ZAYA_ANANDA";
-  var password = "BpQqHffC";
-  var auth = "Basic WkFZQV9BTkFOREE6QnBRcUhmZkM=";
+    var username = "ZAYA_ANANDA";
+    var password = "BpQqHffC";
+    var auth = "Basic WkFZQV9BTkFOREE6QnBRcUhmZkM=";
 
-  let config = {
-    method: "post",
-    maxBodyLength: Infinity,
-    url: "https://merchant.qpay.mn/v2/auth/token",
-    headers: {
-      Authorization: auth,
-      Cookie:
-        "_4d45d=http://10.233.124.201:3000; qpay_merchant_openapi.sid=s%3AmUH56Dazld8FjQACS7Rf1lXhxo73A51I.nancckzXUKIhdVJd%2B2QB16C818FtUm6FH%2BYXjkq7m9I",
-    },
-    data: data,
-  };
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://merchant.qpay.mn/v2/auth/token",
+      headers: {
+        Authorization: auth,
+        Cookie:
+          "_4d45d=http://10.233.124.201:3000; qpay_merchant_openapi.sid=s%3AmUH56Dazld8FjQACS7Rf1lXhxo73A51I.nancckzXUKIhdVJd%2B2QB16C818FtUm6FH%2BYXjkq7m9I",
+      },
+      data: data,
+    };
 
-  axios
-    .request(config)
-    .then(async (response) => {
-      await Qpay.create(response.data);
-    })
-    .catch((error) => {
-      return error;
-    });
+    const response = await axios.request(config);
+    const result = await Qpay.create(response.data);
+    return result.access_token;
+  } catch (error) {
+    return false;
+  }
 };
 
 exports.getQpayToken = asyncHandler(async (req, res) => {
   const currentDate = new Date().toJSON().slice(0, 10);
   const lastQpayData = await Qpay.findOne({}).sort({ createAt: -1 });
   if (!lastQpayData) {
-    getQpayAccess();
+    await getQpayAccess();
   } else if (lastQpayData.createAt.toJSON().slice(0, 10) < currentDate) {
-    getQpayAccess();
+    await getQpayAccess();
   }
 
   res.status(200).json({
@@ -78,17 +77,20 @@ exports.createInvoice = asyncHandler(async (req, res) => {
     amount: req.body.amount,
     callback_url: `${process.env.BASE}payment/call?invoice=${req.body.sender_invoice_no}`,
   });
-
+  let qpayToken = null;
   const accessToken = await Qpay.findOne({}).sort({ createAt: -1 });
   const currentDate = new Date().toJSON().slice(0, 10);
-  if (!accessToken) {
-    getQpayAccess();
-    throw new MyError("Дахин оролдоно уу");
-  }
 
-  if (accessToken.createAt.toJSON().slice(0, 10) < currentDate) {
-    getQpayAccess();
-    this.createInvoice(req);
+  if (
+    !accessToken ||
+    accessToken.createAt.toJSON().slice(0, 10) < currentDate
+  ) {
+    const result = await getQpayAccess();
+    if (result != false) {
+      qpayToken = result;
+    }
+  } else if (accessToken) {
+    qpayToken = accessToken.access_token;
   }
 
   let config = {
@@ -97,7 +99,7 @@ exports.createInvoice = asyncHandler(async (req, res) => {
     url: "https://merchant.qpay.mn/v2/invoice",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken.access_token}`,
+      Authorization: `Bearer ${qpayToken}`,
     },
     data: data,
   };
@@ -144,7 +146,7 @@ exports.getCallBackPayment = asyncHandler(async (req, res) => {
   const accessToken = await Qpay.findOne({}).sort({ createAt: -1 });
 
   if (!accessToken) {
-    getQpayAccess();
+    await getQpayAccess();
   }
 
   if (!result) {

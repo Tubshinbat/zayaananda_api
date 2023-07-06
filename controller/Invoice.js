@@ -48,7 +48,7 @@ exports.getInvoices = asyncHandler(async (req, res, next) => {
   }
 
   if (valueRequired(sender_branch_code)) {
-    query.find({ sender_branch_code: RegexOptions(sender_invoice_no) });
+    query.find({ sender_branch_code: RegexOptions(sender_branch_code) });
   }
 
   if (valueRequired(course)) {
@@ -153,6 +153,14 @@ exports.updateInvoice = asyncHandler(async (req, res, next) => {
 
   if (!invoice) {
     throw new MyError("Тухайн өгөгдөл олдсонгүй. ", 404);
+  }
+  console.log(req.body.isPaid);
+  if (invoice.sender_branch_code === "course" && req.body.isPaid == "true") {
+    const user = await User.findById(invoice.userId);
+    if (user) {
+      user.courses.push(invoice.course);
+      user.save();
+    }
   }
 
   invoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, {
